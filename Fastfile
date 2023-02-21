@@ -1,0 +1,367 @@
+###########################
+# Overrides methods       #
+###########################
+
+desc 'Check if the environment is ready to run fastlane'
+before_all do
+  UI.user_error! 'You must run fastlane using `bundle exec fastlane`' if ENV['BUNDLE_GEMFILE'].nil?
+  ensure_xcode_version(version: "14.0")
+  ruby_version("3.1.3")
+end
+
+desc 'Notify when a lane is finished'
+after_all do |lane|
+  next if is_ci
+
+  notification(
+    title: "✅ fastlane #{lane}",
+    message: "Configuration: #{ENV['CONFIGURATION'] || '(none)'}",
+    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
+    sound: 'default'
+  )
+end
+
+desc 'Notify when an error occurs'
+error do |lane, exception|
+  next if is_ci
+
+  notification(
+    title: "🛑 fastlane #{lane}",
+    message: "Error: #{exception}",
+    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
+    sound: 'hero'
+  )
+end
+
+###########################
+# Prepare                 #
+###########################
+
+desc 'Generate project with XcodeGen'
+lane :prepare do
+  Dir.chdir("../..") do
+    brew(command: 'install swiftgen') if is_ci?
+    sh("swiftgen config run --config Socle/swiftgen.yml")
+  end
+  xcodegen(spec: XCODEGEN_PATH)
+  cocoapods
+end
+
+desc 'Install developer tools'
+lane :install_developer_tools do
+  # Installe rbenv pour l'initialisation de ruby dans le projet
+  brew(command: 'install rbenv')
+
+  # Installe ruby-build, un plugin de rbenv pour installer facilement n'importe quelle version de ruby
+  brew(command: 'install ruby-build')
+
+  # Installe pyenv pour l'initialisation de python dans le projet
+  brew(command: 'install pyenv')
+end
+
+###########################
+# Test                    #
+###########################
+
+desc 'Runs all the tests'
+lane :test do |options|
+  use_html = options[:html] == true
+
+  prepare
+  danger if is_ci?
+
+  scan(
+    workspace: ENV['XCWORKSPACE'],
+    scheme: ENV['SCHEME'],
+    clean: false,
+    result_bundle: true,
+    output_types: use_html ? 'html' : 'junit',
+    code_coverage: true,
+    derived_data_path: DERIVED_DATA_PATH,
+    output_directory: REPORTS_PATH
+  )
+end
+
+###########################
+# Archive                 #
+###########################
+
+desc 'Build and archive the app'
+lane :archive do |options|
+  UI.user_error! 'You need to specify an environment (typically via --env) to use this lane' if ENV['CONFIGURATION'].nil?
+
+  distribution_method = options[:enterprise] == true ? 'enterprise' : 'ad-hoc'
+  export_method = options[:appstore] == true ? 'app-store' : distribution_method
+
+  prepare
+
+  set_build_number
+
+  badge_icon
+
+  gym(
+    workspace: ENV['XCWORKSPACE'],
+    scheme: ENV['SCHEME'],
+    configuration: ENV['CONFIGURATION'],
+    output_name: "#{ENV['APP_NAME']}.ipa",
+    export_method: export_method,
+    sdk: 'iphoneos',
+    silent: true,
+    clean: false,
+    output_directory: IPA_OUTPUT_DIR
+  )
+end
+
+desc 'Extract the build number from bitrise into environment variables and set in Info.plist'
+private_lane :set_build_number do
+  UI.message 'Extracting Build number'
+  if ENV['BITRISE_BUILD_NUMBER']
+    UI.message "==> bitrise build number : #{ENV['BITRISE_BUILD_NUMBER']}"
+    set_info_plist_value(
+      path: ENV['PLIST_PATH'],
+      key: 'CFBundleVersion',
+      value: ENV['BITRISE_BUILD_NUMBER']
+    )
+  end
+end
+
+desc 'Extract the version & build number from the project into environment variables'
+private_lane :get_versions_from_project do
+  UI.message 'Extracting Version & Build number…'
+  current_version = get_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION'
+  )
+  current_build_number = get_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_BUILD_NUMBER'
+  )
+  ENV['VERSION_NUMBER'] = current_version
+  ENV['BUILD_NUMBER'] = ENV['BITRISE_BUILD_NUMBER'] || current_build_number
+  UI.message "==> v#{ENV['VERSION_NUMBER']} (#{ENV['BUILD_NUMBER']})"
+end
+
+desc 'Add a badge to the bottom of the icon with the version/build/env info'
+# @option add_badge: true|false — defaults to false (which just git-resets the icon to remove the badge)
+private_lane :badge_icon do |options|
+  if options[:add_badge]
+    brew(command: 'install imagemagick')
+    # Reset the icon
+    Dir['../**/*.appiconset'].each do |path|
+      puts %(Reverting: git checkout -- "#{path}")
+      `git checkout -- "#{path}"`
+    end
+
+    get_versions_from_project
+
+    # Add the shield.io badge
+    add_badge(
+      shield: "#{ENV['VERSION_NUMBER']}%20(#{ENV['BUILD_NUMBER']})-#{ENV['APP_ENVIRONMENT']}-blue",
+      shield_gravity: 'SouthEast',
+      no_badge: true # Remove default "Beta" banner
+    )
+  end
+end
+
+###########################
+# Deploy                  #
+###########################
+
+desc 'Build and distribute OTA to Firebase App Distribution'
+lane :ota do |options|
+  UI.user_error! 'You need to specify an environment (typically via --env) to use this lane' if ENV['CONFIGURATION'].nil?
+
+  is_enterprise = options[:enterprise] == true
+
+  archive(
+    enterprise: is_enterprise,
+    appstore: false
+  )
+
+  changelog = '' # TODO
+
+  firebase_app_distribution(
+    app: ENV['FIREBASE_APP'],
+    release_notes: changelog,
+    firebase_cli_token: ENV['FIREBASE_CLI_TOKEN']
+  )
+end
+
+desc 'Submit a new Beta Build to Apple TestFlight'
+lane :beta do
+  UI.user_error! 'You need to specify an environment (typically via --env) to use this lane' if ENV['CONFIGURATION'].nil?
+
+  archive(
+    enterprise: false,
+    appstore: true
+  )
+
+  pilot(
+    api_key_path: API_KEY_PATH,
+    skip_submission: true,
+    skip_waiting_for_build_processing: true
+  )
+end
+
+###########################
+# Metrics / Sonar         #
+###########################
+
+desc "Install all metrics tools"
+lane :install_metrics_tools do
+  sh('pip install mobsfscan')
+  brew(command: 'install swiftlint')
+  brew(command: 'install peripheryapp/periphery/perixxphery')
+  brew(command: 'install sonar-scanner')
+end
+
+desc "Send all metrics to Sonar"
+lane :send_metrics do
+  prepare
+  test(html: false)
+  install_metrics_tools
+  version = get_version_number(
+    xcodeproj: ENV["XCPROJECT"],
+    target: ENV["TARGET"]
+  )
+  sonar(
+    project_version: version
+  )
+end
+
+###########################
+# Swagger                 #
+###########################
+
+desc "Generate network stack with SwagGen"
+lane :swaggen do
+  brew(command: 'install mint')
+  sh('mint install yonaskolb/SwagGen')
+
+  # We clean all previous generated files
+  FileUtils.rm_rf Dir.glob("#{OUTPUT_PATH_SWAGGEN}/*") # if OUTPUT_PATH_SWAGGEN.present?
+
+  paths = Dir["#{API_PATH}/yamls/*.yaml"]
+
+  paths.each do |path|
+    cmd = ['mint run swaggen generate']
+
+    cmd << path
+
+    cmd << '--destination'
+    cmd << OUTPUT_PATH_SWAGGEN
+
+    cmd << '--template'
+    cmd << TEMPLATE_PATH_SWAGGEN
+
+    cmd << '--clean'
+    cmd << 'all'
+
+    sh cmd.compact.join " "
+  end
+  prepare
+end
+
+###########################
+# Versioning              #
+###########################
+
+desc "Increment the patch number of APP_VERSION"
+lane :increment_patch do
+  # get current version with xcconfig plugin
+  current_version = get_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION'
+  )
+  # parse version number and add 1 to the patch number
+  parsed_version = current_version.split(".").map(&:to_i)
+  new_version = "#{parsed_version[0]}.#{parsed_version[1]}.#{parsed_version[2] + 1}"
+
+  # update version with xcconfig plugin
+  update_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION',
+    value: new_version.to_s
+  )
+
+  # run the prepare lane to update xcodeproj
+  prepare
+end
+
+desc "Increment the minor number of APP_VERSION"
+lane :increment_minor do
+  # get current version with xcconfig plugin
+  current_version = get_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION'
+  )
+  # parse version number, add 1 to the minor number and reset patch number
+  parsed_version = current_version.split(".").map(&:to_i)
+  new_version = "#{parsed_version[0]}.#{parsed_version[1] + 1}.0"
+
+  # update version with xcconfig plugin
+  update_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION',
+    value: new_version.to_s
+  )
+
+  # run the prepare lane to update xcodeproj
+  prepare
+end
+
+desc "Increment the major number of APP_VERSION"
+lane :increment_major do
+  # get current version with xcconfig plugin
+  current_version = get_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION'
+  )
+  # parse version number, add 1 to the major number and reset minor and patch numbers
+  parsed_version = current_version.split(".").map(&:to_i)
+  new_version = "#{parsed_version[0] + 1}.0.0"
+
+  # update version with xcconfig plugin
+  update_xcconfig_value(
+    path: APP_VERSION_PATH,
+    name: 'APP_VERSION',
+    value: new_version.to_s
+  )
+
+  # run the prepare lane to update xcodeproj
+  prepare
+end
+
+###########################
+# Check certificates and provisioning profiles
+###########################
+
+desc "Checks the expiration date for all certificates and provisioning profiles"
+lane :check_certificates_and_profiles do
+  Spaceship::Portal.login(APPLE_LOGIN)
+  Spaceship::Portal.select_team(team_id: TEAM_ID)
+
+  # Fetch all available certificates (includes signing and push profiles)
+  certificates = Spaceship::Portal.certificate.all
+  certificates.each do |certificate|
+    certificate_days_before_expires = (certificate.expires.to_datetime - DateTime.now).to_i
+    puts("#{certificate.name} / created by #{certificate.owner_name} : expires in #{certificate_days_before_expires} days")
+  end
+
+  # Fetch all available provisioning profiles
+  profiles = Spaceship::Portal.provisioning_profile.all
+  profiles.each do |profile|
+    profile_days_before_expires = (profile.expires - DateTime.now).to_i
+    puts("#{profile.name} : expires in #{profile_days_before_expires} days")
+  end
+
+  # AppStore provisioning profile
+  app_store = Spaceship::Portal.provisioning_profile.app_store.find_by_bundle_id(bundle_id: ENV['BUNDLE_IDENTIFIER']).first
+  app_store_days_before_expires = (app_store.expires - DateTime.now).to_i
+  puts("#{app_store.name} : expire dans #{app_store_days_before_expires} jours")
+
+  # AdHoc provisioning profile
+  ad_hoc = Spaceship::Portal.provisioning_profile.ad_hoc.find_by_bundle_id(bundle_id: ENV['BUNDLE_IDENTIFIER']).first
+  ad_hoc_days_before_expires = (ad_hoc.expires - DateTime.now).to_i
+  puts("#{ad_hoc.name} : expire dans #{ad_hoc_days_before_expires} jours")
+end

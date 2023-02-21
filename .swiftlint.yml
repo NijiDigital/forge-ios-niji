@@ -1,0 +1,38 @@
+excluded:
+  - Generated
+  - Pods
+  - Templates
+  - vendor
+  - .build
+
+custom_rules:
+  swiftgen_assets:
+    name: "SwiftGen Assets"
+    regex: '(UIImage|UIColor)(\.init)?\(named: ?"?.+"?(, ?in:.+?, ?compatibleWith:.+?)?\)|#imageLiteral\(resourceName: ?".+"\)'
+    message: "Use Asset.<asset> instead"
+    severity: error
+  swiftgen_colors:
+    name: "SwiftGen Colors"
+    regex: '(UIColor(\.init)?|#colorLiteral)\(((red|displayP3Red):.+?,green:.+?,blue:.+?,alpha:.+?)|(white:.+?,alpha:.+?)|(hue:.+?,saturation:.+?,brightness:.+?,alpha:.+?)\)'
+    message: "Use ColorName.<color> instead"
+    severity: error
+  swiftgen_files:
+    name: "SwiftGen Files"
+    regex: '(url\(forResource: ?"?.+"?, ?withExtension: ?"?.+"?, ?subdirectory: ?"?.+"?(, ?localization: ?"?.+"?)?\))|(path\(forResource: ?"?.+"?, ?ofType: ?"?.+"?(, ?inDirectory: ?"?.+"?(, ?forLocalization: ?"?.+"?)?)?\))'
+    message: "Use Files.<dir/file> instead"
+    severity: error
+  swiftgen_fonts:
+    name: "SwiftGen Fonts"
+    regex: 'UIFont(\.init)?\(name: ?"?.+"?, ?size:.+?\)'
+    message: "Use FontFamily.<family>.<variant>.size(<size>) instead"
+    severity: error
+  swiftgen_storyboards:
+    name: "SwiftGen Storyboard Scenes"
+    regex: '(UIStoryboard\(name: ?"?.+"?, ?bundle:.+\))|(instantiateViewController\(withIdentifier:.+?\))|(instantiateInitialViewController\(\))'
+    message: "Use StoryboardScene.<storyboad>.<scene>.instantiate() instead"
+    severity: error
+  swiftgen_strings:
+    name: "SwiftGen Strings"
+    regex: 'NSLocalizedString'
+    message: "Use L10n.key instead"
+    severity: error

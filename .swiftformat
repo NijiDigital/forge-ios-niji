@@ -1,0 +1,25 @@
+# Swift format
+
+--swiftversion 5.6
+
+## file options
+
+--exclude Pods,Templates,CodeSigning,build,Environments,fastlane,scripts,reports,**/Constants
+
+## format options
+
+--ranges no-space
+--wrapparameters after-first
+--wrapcollections before-first
+--funcattributes preserve
+--typeattributes prev-line
+--varattributes same-line
+--self init-only
+--stripunusedargs closure-only
+--trimwhitespace nonblank-lines
+--xcodeindentation enabled
+
+## rules
+
+--disable fileHeader,hoistPatternLet,initCoderUnavailable,numberFormatting,preferKeyPath,redundantParens,trailingClosures,wrap,wrapMultilineStatementBraces,yodaConditions
+--enable isEmpty,wrapEnumCases,wrapSwitchCases
