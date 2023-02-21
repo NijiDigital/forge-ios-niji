@@ -1,47 +1,13 @@
 ###########################
-# Overrides methods       #
-###########################
-
-desc 'Check if the environment is ready to run fastlane'
-before_all do
-  UI.user_error! 'You must run fastlane using `bundle exec fastlane`' if ENV['BUNDLE_GEMFILE'].nil?
-  ensure_xcode_version(version: "14.0")
-  ruby_version("3.1.3")
-end
-
-desc 'Notify when a lane is finished'
-after_all do |lane|
-  next if is_ci
-
-  notification(
-    title: "✅ fastlane #{lane}",
-    message: "Configuration: #{ENV['CONFIGURATION'] || '(none)'}",
-    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
-    sound: 'default'
-  )
-end
-
-desc 'Notify when an error occurs'
-error do |lane, exception|
-  next if is_ci
-
-  notification(
-    title: "🛑 fastlane #{lane}",
-    message: "Error: #{exception}",
-    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
-    sound: 'hero'
-  )
-end
-
-###########################
 # Prepare                 #
 ###########################
 
 desc 'Generate project with XcodeGen'
 lane :prepare do
-  Dir.chdir("../..") do
+  check_dependencies
+  Dir.chdir("..") do
     brew(command: 'install swiftgen') if is_ci?
-    sh("swiftgen config run --config Socle/swiftgen.yml")
+    sh("swiftgen config run --config #{SWIFTGEN_PATH}")
   end
   xcodegen(spec: XCODEGEN_PATH)
   cocoapods
@@ -57,6 +23,15 @@ lane :install_developer_tools do
 
   # Installe pyenv pour l'initialisation de python dans le projet
   brew(command: 'install pyenv')
+end
+
+def check_dependencies
+  fastlane_require 'fastlane-plugin-xcodegen'
+  fastlane_require 'fastlane-plugin-firebase_app_distribution'
+  fastlane_require 'fastlane-plugin-brew'
+  fastlane_require 'fastlane-plugin-xcconfig'
+  fastlane_require 'fastlane-plugin-changelog'
+  fastlane_require 'fastlane-plugin-badge'
 end
 
 ###########################
@@ -230,34 +205,26 @@ lane :send_metrics do
 end
 
 ###########################
+# Poesie                  #
+###########################
+
+desc "Import Loacalizable.string from POEditor"
+lane :poesie do
+  Dir.chdir("..") do
+    sh("Scripts/poesie.sh")
+  end
+end
+
+###########################
 # Swagger                 #
 ###########################
 
 desc "Generate network stack with SwagGen"
 lane :swaggen do
-  brew(command: 'install mint')
-  sh('mint install yonaskolb/SwagGen')
-
-  # We clean all previous generated files
-  FileUtils.rm_rf Dir.glob("#{OUTPUT_PATH_SWAGGEN}/*") # if OUTPUT_PATH_SWAGGEN.present?
-
-  paths = Dir["#{API_PATH}/yamls/*.yaml"]
-
-  paths.each do |path|
-    cmd = ['mint run swaggen generate']
-
-    cmd << path
-
-    cmd << '--destination'
-    cmd << OUTPUT_PATH_SWAGGEN
-
-    cmd << '--template'
-    cmd << TEMPLATE_PATH_SWAGGEN
-
-    cmd << '--clean'
-    cmd << 'all'
-
-    sh cmd.compact.join " "
+  Dir.chdir("..") do
+    brew(command: 'install mint')
+    sh('mint install yonaskolb/SwagGen')
+    sh("Scripts/swaggen.sh")
   end
   prepare
 end
