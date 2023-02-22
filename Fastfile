@@ -226,9 +226,9 @@ end
 
 desc "Import Loacalizable.string from POEditor"
 lane :poesie do
-  Dir.chdir("..") do
-    sh("Scripts/poesie.sh")
-  end
+  sh("Scripts/poesie.sh")
+  poesie_path = File.realpath(Dir['../fastlane/Scripts/poesie.sh'][0])
+  sh('bash ' + poesie_path)
 end
 
 ###########################
@@ -237,12 +237,10 @@ end
 
 desc "Generate network stack with SwagGen"
 lane :swaggen do
-  Dir.chdir("..") do
-    brew(command: 'install mint')
-    sh('mint install yonaskolb/SwagGen')
-    sh("Scripts/swaggen.sh")
-  end
-  prepare
+  brew(command: 'install mint')
+  sh('mint install yonaskolb/SwagGen')
+  swaggen_path = File.realpath(Dir['../fastlane/Scripts/swaggen.sh'][0])
+  sh('bash ' + swaggen_path)
 end
 
 ###########################
