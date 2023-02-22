@@ -1,17 +1,6 @@
 ###########################
-# Prepare                 #
+# Requirement             #
 ###########################
-
-desc 'Generate project with XcodeGen'
-lane :prepare do
-  check_dependencies
-  Dir.chdir("..") do
-    brew(command: 'install swiftgen') if is_ci?
-    sh("swiftgen config run --config #{SWIFTGEN_PATH}")
-  end
-  xcodegen(spec: XCODEGEN_PATH)
-  cocoapods
-end
 
 desc 'Install developer tools'
 lane :install_developer_tools do
@@ -32,6 +21,33 @@ def check_dependencies
   fastlane_require 'fastlane-plugin-xcconfig'
   fastlane_require 'fastlane-plugin-changelog'
   fastlane_require 'fastlane-plugin-badge'
+end
+
+###########################
+# Prepare                 #
+###########################
+
+desc 'Before prepare'
+lane :before_prepare do
+  # override method
+  check_dependencies
+  Dir.chdir("..") do
+    brew(command: 'install swiftgen') if is_ci?
+    sh("swiftgen config run --config #{SWIFTGEN_PATH}")
+  end
+end
+
+desc 'Generate project and install pods'
+lane :prepare do
+  before_prepare
+  xcodegen(spec: XCODEGEN_PATH)
+  cocoapods
+  after_prepare
+end
+
+desc 'After prepare'
+lane :after_prepare do
+  # override method
 end
 
 ###########################
