@@ -1,9 +1,10 @@
-fastlane_require 'fastlane-plugin-xcodegen'
-fastlane_require 'fastlane-plugin-firebase_app_distribution'
-fastlane_require 'fastlane-plugin-brew'
-fastlane_require 'fastlane-plugin-xcconfig'
-fastlane_require 'fastlane-plugin-changelog'
 fastlane_require 'fastlane-plugin-badge'
+fastlane_require 'fastlane-plugin-brew'
+fastlane_require 'fastlane-plugin-changelog'
+fastlane_require 'fastlane-plugin-firebase_app_distribution'
+fastlane_require 'fastlane-plugin-swiftformat'
+fastlane_require 'fastlane-plugin-xcconfig'
+fastlane_require 'fastlane-plugin-xcodegen'
 
 ###########################
 # Requirement             #
@@ -218,12 +219,36 @@ lane :send_metrics do
 end
 
 ###########################
+# Lint                    #
+###########################
+
+desc 'Lint the project'
+lane :lint do
+  swiftlint(
+    mode: :lint,
+    reporter: 'xcode',
+    config_file: 'forge/.swiftlint.yml'
+  )  
+end
+
+###########################
+# Format                  #
+###########################
+
+desc 'Format the project'
+lane :format do
+  swiftformat(
+    swiftversion: '5.6',          
+    config: 'forge/.swiftformat'
+  )
+end
+
+###########################
 # Poesie                  #
 ###########################
 
-desc "Import Loacalizable.string from POEditor"
+desc 'Import Loacalizable.string from POEditor'
 lane :poesie do
-  sh("Scripts/poesie.sh")
   poesie_path = File.realpath(Dir['../fastlane/Scripts/poesie.sh'][0])
   sh('bash ' + poesie_path)
 end
@@ -232,7 +257,7 @@ end
 # Swagger                 #
 ###########################
 
-desc "Generate network stack with SwagGen"
+desc 'Generate network stack with SwagGen'
 lane :swaggen do
   brew(command: 'install mint')
   sh('mint install yonaskolb/SwagGen')
