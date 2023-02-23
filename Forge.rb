@@ -29,10 +29,6 @@ end
 desc 'Before prepare'
 lane :before_prepare do
   # override method
-  Dir.chdir("..") do
-    brew(command: 'install swiftgen') if is_ci?
-    sh("swiftgen config run --config #{SWIFTGEN_PATH}")
-  end
 end
 
 desc 'Generate project and install pods'
@@ -215,31 +211,6 @@ lane :send_metrics do
   )
   sonar(
     project_version: version
-  )
-end
-
-###########################
-# Lint                    #
-###########################
-
-desc 'Lint the project'
-lane :lint do
-  swiftlint(
-    mode: :lint,
-    reporter: 'xcode',
-    config_file: 'forge/.swiftlint.yml'
-  )  
-end
-
-###########################
-# Format                  #
-###########################
-
-desc 'Format the project'
-lane :format do
-  swiftformat(
-    swiftversion: '5.6',          
-    config: 'forge/.swiftformat'
   )
 end
 

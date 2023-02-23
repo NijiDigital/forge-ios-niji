@@ -1,8 +1,8 @@
 #!/bin/sh
 
-if which "$PODS_ROOT/SwiftGen/bin/swiftgen" >/dev/null; then
-  echo "Running SwiftGen"
-  "$PODS_ROOT/SwiftGen/bin/swiftgen" config run --config "$PROJECT_DIR/$TARGETNAME/swiftgen.yml"
+export PATH="$PATH:/opt/homebrew/bin"
+if which swiftgen > /dev/null; then
+  swiftgen config run --config "$PROJECT_DIR/$TARGETNAME/swiftgen.yml"
 else
-  echo "warning: SwiftGen is not installed, download from https://github.com/SwiftGen/SwiftGen"
+  echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
 fi

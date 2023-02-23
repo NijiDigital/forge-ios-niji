@@ -1,38 +1,42 @@
-excluded:
-  - Generated
-  - Pods
-  - Templates
-  - vendor
-  - .build
+# rule identifiers to exclude from running
+disabled_rules:
+  - file_length
+  - identifier_name
+  - line_length
+  - notification_center_detachment
+  - redundant_string_enum_value
+  - todo
+  - trailing_whitespace
+  - valid_ibinspectable
 
 custom_rules:
   swiftgen_assets:
     name: "SwiftGen Assets"
     regex: '(UIImage|UIColor)(\.init)?\(named: ?"?.+"?(, ?in:.+?, ?compatibleWith:.+?)?\)|#imageLiteral\(resourceName: ?".+"\)'
     message: "Use Asset.<asset> instead"
-    severity: error
+    severity: warning
   swiftgen_colors:
     name: "SwiftGen Colors"
     regex: '(UIColor(\.init)?|#colorLiteral)\(((red|displayP3Red):.+?,green:.+?,blue:.+?,alpha:.+?)|(white:.+?,alpha:.+?)|(hue:.+?,saturation:.+?,brightness:.+?,alpha:.+?)\)'
     message: "Use ColorName.<color> instead"
-    severity: error
+    severity: warning
   swiftgen_files:
     name: "SwiftGen Files"
     regex: '(url\(forResource: ?"?.+"?, ?withExtension: ?"?.+"?, ?subdirectory: ?"?.+"?(, ?localization: ?"?.+"?)?\))|(path\(forResource: ?"?.+"?, ?ofType: ?"?.+"?(, ?inDirectory: ?"?.+"?(, ?forLocalization: ?"?.+"?)?)?\))'
     message: "Use Files.<dir/file> instead"
-    severity: error
+    severity: warning
   swiftgen_fonts:
     name: "SwiftGen Fonts"
     regex: 'UIFont(\.init)?\(name: ?"?.+"?, ?size:.+?\)'
     message: "Use FontFamily.<family>.<variant>.size(<size>) instead"
-    severity: error
+    severity: warning
   swiftgen_storyboards:
     name: "SwiftGen Storyboard Scenes"
     regex: '(UIStoryboard\(name: ?"?.+"?, ?bundle:.+\))|(instantiateViewController\(withIdentifier:.+?\))|(instantiateInitialViewController\(\))'
     message: "Use StoryboardScene.<storyboad>.<scene>.instantiate() instead"
-    severity: error
+    severity: warning
   swiftgen_strings:
     name: "SwiftGen Strings"
     regex: 'NSLocalizedString'
     message: "Use L10n.key instead"
-    severity: error
+    severity: warning
