@@ -15,3 +15,9 @@ cd fastlane
 ```sh
 git submodule add git@github.com:NijiDigital/forge-ios-niji.git forge
 ```
+
+Add import in your Fastfile
+
+```ruby
+import 'forge/Forge.rb'
+```

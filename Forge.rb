@@ -2,7 +2,6 @@ fastlane_require 'fastlane-plugin-badge'
 fastlane_require 'fastlane-plugin-brew'
 fastlane_require 'fastlane-plugin-changelog'
 fastlane_require 'fastlane-plugin-firebase_app_distribution'
-fastlane_require 'fastlane-plugin-swiftformat'
 fastlane_require 'fastlane-plugin-xcconfig'
 fastlane_require 'fastlane-plugin-xcodegen'
 
@@ -20,6 +19,12 @@ lane :install_developer_tools do
 
   # Installe pyenv pour l'initialisation de python dans le projet
   brew(command: 'install pyenv')
+
+  # Installe swiftlint
+  brew(command: 'install swiftlint')
+
+  #Installe swiftformat
+  brew(command: 'install swiftformat')
 end
 
 ###########################

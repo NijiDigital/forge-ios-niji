@@ -1,6 +1,4 @@
-# file options
-
---exclude Pods,Templates,CodeSigning,Build,Environments,fastlane,scripts,vendor,Reports,**/Constants
+--swiftversion 5.6
 
 # format options
 
