@@ -4,10 +4,12 @@
 
 ## file options
 
---exclude Pods,Templates,CodeSigning,build,Environments,fastlane,scripts,reports,**/Constants
+--exclude Pods,Templates,CodeSigning,Build,Environments,fastlane,scripts,vendor,Reports,**/Constants
 
 ## format options
 
+--commas inline
+--indent 2
 --ranges no-space
 --wrapparameters after-first
 --wrapcollections before-first

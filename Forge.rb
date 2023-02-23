@@ -1,3 +1,10 @@
+fastlane_require 'fastlane-plugin-xcodegen'
+fastlane_require 'fastlane-plugin-firebase_app_distribution'
+fastlane_require 'fastlane-plugin-brew'
+fastlane_require 'fastlane-plugin-xcconfig'
+fastlane_require 'fastlane-plugin-changelog'
+fastlane_require 'fastlane-plugin-badge'
+
 ###########################
 # Requirement             #
 ###########################
@@ -14,15 +21,6 @@ lane :install_developer_tools do
   brew(command: 'install pyenv')
 end
 
-def check_dependencies
-  fastlane_require 'fastlane-plugin-xcodegen'
-  fastlane_require 'fastlane-plugin-firebase_app_distribution'
-  fastlane_require 'fastlane-plugin-brew'
-  fastlane_require 'fastlane-plugin-xcconfig'
-  fastlane_require 'fastlane-plugin-changelog'
-  fastlane_require 'fastlane-plugin-badge'
-end
-
 ###########################
 # Prepare                 #
 ###########################
@@ -30,7 +28,6 @@ end
 desc 'Before prepare'
 lane :before_prepare do
   # override method
-  check_dependencies
   Dir.chdir("..") do
     brew(command: 'install swiftgen') if is_ci?
     sh("swiftgen config run --config #{SWIFTGEN_PATH}")
