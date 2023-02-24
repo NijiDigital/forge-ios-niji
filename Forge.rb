@@ -23,7 +23,7 @@ lane :install_developer_tools do
   # Installe swiftlint
   brew(command: 'install swiftlint')
 
-  #Installe swiftformat
+  # Installe swiftformat
   brew(command: 'install swiftformat')
 end
 
@@ -262,9 +262,6 @@ lane :increment_patch do
     name: 'APP_VERSION',
     value: new_version.to_s
   )
-
-  # run the prepare lane to update xcodeproj
-  prepare
 end
 
 desc "Increment the minor number of APP_VERSION"
@@ -284,9 +281,6 @@ lane :increment_minor do
     name: 'APP_VERSION',
     value: new_version.to_s
   )
-
-  # run the prepare lane to update xcodeproj
-  prepare
 end
 
 desc "Increment the major number of APP_VERSION"
@@ -306,9 +300,6 @@ lane :increment_major do
     name: 'APP_VERSION',
     value: new_version.to_s
   )
-
-  # run the prepare lane to update xcodeproj
-  prepare
 end
 
 ###########################
