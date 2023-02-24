@@ -32,20 +32,20 @@ end
 ###########################
 
 desc 'Before prepare'
-lane :before_prepare do
+lane :before_prepare do |options|
   # override method
 end
 
 desc 'Generate project and install pods'
-lane :prepare do
-  before_prepare
+lane :prepare do |options|
+  before_prepare(options)
   xcodegen(spec: XCODEGEN_PATH)
   cocoapods
-  after_prepare
+  after_prepare(options)
 end
 
 desc 'After prepare'
-lane :after_prepare do
+lane :after_prepare do |options|
   # override method
 end
 
