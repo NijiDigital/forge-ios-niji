@@ -61,9 +61,8 @@ lane :test do |options|
   prepare
 
   if is_ci
-    UI.message "Running Danger on CI… 🚀 : #{DANGERFILE_PATH}"
     danger(
-      dangerfile: DANGERFILE_PATH
+      dangerfile: 'fastlane/forge/Dangerfile'
     )
   end
 
