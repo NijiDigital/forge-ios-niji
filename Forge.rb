@@ -54,14 +54,16 @@ end
 # Test                    #
 ###########################
 
+lane :before_test do |options|
+  # override method
+end
+
 desc 'Runs all the tests'
 lane :test do |options|
   use_html = options[:html] == true
 
-  if is_ci
-    sh("danger --dangerfile=#{DANGERFILE_PATH} --verbose")
-  end
-  
+  before_test(options)
+
   prepare
 
   scan(
