@@ -38,8 +38,8 @@ end
 
 desc 'Generate project and install pods'
 lane :prepare do |options|
-  before_prepare(options)
   install_developer_tools if is_ci?
+  before_prepare(options)
   xcodegen(spec: XCODEGEN_PATH)
   cocoapods
   after_prepare(options)
