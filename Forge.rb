@@ -206,7 +206,7 @@ desc "Install all metrics tools"
 lane :install_metrics_tools do
   sh('pip install mobsfscan')
   brew(command: 'install swiftlint')
-  brew(command: 'install peripheryapp/periphery/perixxphery')
+  brew(command: 'install peripheryapp/periphery/periphery')
   brew(command: 'install sonar-scanner')
 end
 
