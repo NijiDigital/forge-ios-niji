@@ -62,7 +62,8 @@ lane :test do |options|
 
   if is_ci
     danger(
-      dangerfile: 'fastlane/forge/Dangerfile'
+      dangerfile: 'fastlane/forge/Dangerfile',
+      verbose: true
     )
   end
 
