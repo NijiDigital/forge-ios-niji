@@ -61,6 +61,7 @@ lane :test do |options|
   prepare
 
   if is_ci
+    puts 'Running Danger on CI… 🚀' + 'Dangerfile: ' + DANGERFILE_PATH
     danger(
       dangerfile: DANGERFILE_PATH
     )
