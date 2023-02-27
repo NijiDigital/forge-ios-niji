@@ -62,7 +62,7 @@ lane :test do |options|
 
   if is_ci
     danger(
-      dangerfile: 'fastlane/forge/Dangerfile',
+      dangerfile: DANGERFILE_PATH,
       verbose: true
     )
   end
