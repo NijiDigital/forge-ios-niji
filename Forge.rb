@@ -58,14 +58,11 @@ desc 'Runs all the tests'
 lane :test do |options|
   use_html = options[:html] == true
 
-  prepare
-
   if is_ci
-    danger(
-      dangerfile: DANGERFILE_PATH,
-      verbose: true
-    )
+    sh("danger --dangerfile=#{DANGERFILE_PATH} --verbose")
   end
+  
+  prepare
 
   scan(
     workspace: ENV['XCWORKSPACE'],
