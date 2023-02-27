@@ -39,7 +39,7 @@ end
 desc 'Generate project and install pods'
 lane :prepare do |options|
   before_prepare(options)
-  xcodegen(spec: XCODEGEN_PATH)
+  xcodegen(spec: ENV.fetch('XCODEGEN_PATH', nil))
   cocoapods
   after_prepare(options)
 end
@@ -53,28 +53,25 @@ end
 # Test                    #
 ###########################
 
-lane :before_test do |options|
-  # override method
-end
-
 desc 'Runs all the tests'
 lane :test do |options|
-  use_html = options[:html] == true
-
-  before_test(options)
-
   prepare(options)
 
   scan(
-    workspace: ENV['XCWORKSPACE'],
-    scheme: ENV['SCHEME'],
+    workspace: ENV.fetch('XCWORKSPACE', nil),
+    scheme: ENV.fetch('SCHEME', nil),
     clean: false,
     result_bundle: true,
-    output_types: use_html ? 'html' : 'junit',
     code_coverage: true,
-    derived_data_path: DERIVED_DATA_PATH,
-    output_directory: REPORTS_PATH
+    derived_data_path: ENV.fetch('DERIVED_DATA_PATH'),
+    output_directory: ENV.fetch('REPORTS_PATH')
   )
+
+  after_test(options)
+end
+
+lane :after_test do |options|
+  # override method
 end
 
 ###########################
@@ -94,15 +91,15 @@ lane :archive do |options|
   badge_icon
 
   gym(
-    workspace: ENV['XCWORKSPACE'],
-    scheme: ENV['SCHEME'],
-    configuration: ENV['CONFIGURATION'],
+    workspace: ENV.fetch('XCWORKSPACE', nil),
+    scheme: ENV.fetch('SCHEME', nil),
+    configuration: ENV.fetch('CONFIGURATION', nil),
     output_name: "#{ENV['APP_NAME']}.ipa",
     export_method: export_method,
     sdk: 'iphoneos',
     silent: true,
     clean: false,
-    output_directory: IPA_OUTPUT_DIR
+    output_directory: ENV.fetch('IPA_OUTPUT_DIR', nil)
   )
 end
 
@@ -112,7 +109,7 @@ private_lane :set_build_number do
   if ENV['BITRISE_BUILD_NUMBER']
     UI.message "==> bitrise build number : #{ENV['BITRISE_BUILD_NUMBER']}"
     set_info_plist_value(
-      path: ENV['PLIST_PATH'],
+      path: ENV.fetch('PLIST_PATH', nil),
       key: 'CFBundleVersion',
       value: ENV['BITRISE_BUILD_NUMBER']
     )
@@ -138,7 +135,7 @@ end
 desc 'Add a badge to the bottom of the icon with the version/build/env info'
 # @option add_badge: true|false — defaults to false (which just git-resets the icon to remove the badge)
 private_lane :badge_icon do |options|
-  if options[:add_badge]
+  if options[:badge]
     brew(command: 'install imagemagick')
     # Reset the icon
     Dir['../**/*.appiconset'].each do |path|
@@ -173,9 +170,9 @@ lane :ota do |options|
   changelog = '' # TODO
 
   firebase_app_distribution(
-    app: ENV['FIREBASE_APP'],
+    app: ENV.fetch('FIREBASE_APP', nil),
     release_notes: changelog,
-    firebase_cli_token: ENV['FIREBASE_CLI_TOKEN']
+    firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil)
   )
 end
 
@@ -188,7 +185,7 @@ lane :beta do |options|
   )
 
   pilot(
-    api_key_path: API_KEY_PATH,
+    api_key_path: ENV.fetch('API_KEY_PATH', nil),
     skip_submission: true,
     skip_waiting_for_build_processing: true
   )
@@ -209,15 +206,13 @@ end
 desc "Send all metrics to Sonar"
 lane :send_metrics do
   prepare
-  test(html: false)
+  test
   install_metrics_tools
   version = get_version_number(
-    xcodeproj: ENV["XCPROJECT"],
-    target: ENV["TARGET"]
+    xcodeproj: ENV.fetch('XCPROJECT', nil),
+    target: ENV.fetch('TARGET', nil)
   )
-  sonar(
-    project_version: version
-  )
+  sonar(project_version: version)
 end
 
 ###########################
@@ -226,8 +221,7 @@ end
 
 desc 'Import Loacalizable.string from POEditor'
 lane :poesie do
-  poesie_path = File.realpath(Dir['../fastlane/Scripts/poesie.sh'][0])
-  sh("bash #{poesie_path}")
+  sh("bash #{ENV['POESIE_PATH']}")
 end
 
 ###########################
@@ -238,8 +232,7 @@ desc 'Generate network stack with SwagGen'
 lane :swaggen do
   brew(command: 'install mint')
   sh('mint install yonaskolb/SwagGen')
-  swaggen_path = File.realpath(Dir['../fastlane/Scripts/swaggen.sh'][0])
-  sh("bash #{swaggen_path}")
+  sh("bash #{ENV['SWAGGEN_PATH']}")
 end
 
 ###########################
@@ -250,7 +243,7 @@ desc "Increment the patch number of APP_VERSION"
 lane :increment_patch do
   # get current version with xcconfig plugin
   current_version = get_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION'
   )
   # parse version number and add 1 to the patch number
@@ -259,7 +252,7 @@ lane :increment_patch do
 
   # update version with xcconfig plugin
   update_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION',
     value: new_version.to_s
   )
@@ -269,7 +262,7 @@ desc "Increment the minor number of APP_VERSION"
 lane :increment_minor do
   # get current version with xcconfig plugin
   current_version = get_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION'
   )
   # parse version number, add 1 to the minor number and reset patch number
@@ -278,7 +271,7 @@ lane :increment_minor do
 
   # update version with xcconfig plugin
   update_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION',
     value: new_version.to_s
   )
@@ -288,7 +281,7 @@ desc "Increment the major number of APP_VERSION"
 lane :increment_major do
   # get current version with xcconfig plugin
   current_version = get_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION'
   )
   # parse version number, add 1 to the major number and reset minor and patch numbers
@@ -297,42 +290,8 @@ lane :increment_major do
 
   # update version with xcconfig plugin
   update_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION',
     value: new_version.to_s
   )
-end
-
-###########################
-# Check certificates and provisioning profiles
-###########################
-
-desc "Checks the expiration date for all certificates and provisioning profiles"
-lane :check_certificates_and_profiles do
-  Spaceship::Portal.login(APPLE_LOGIN)
-  Spaceship::Portal.select_team(team_id: TEAM_ID)
-
-  # Fetch all available certificates (includes signing and push profiles)
-  certificates = Spaceship::Portal.certificate.all
-  certificates.each do |certificate|
-    certificate_days_before_expires = (certificate.expires.to_datetime - DateTime.now).to_i
-    puts("#{certificate.name} / created by #{certificate.owner_name} : expires in #{certificate_days_before_expires} days")
-  end
-
-  # Fetch all available provisioning profiles
-  profiles = Spaceship::Portal.provisioning_profile.all
-  profiles.each do |profile|
-    profile_days_before_expires = (profile.expires - DateTime.now).to_i
-    puts("#{profile.name} : expires in #{profile_days_before_expires} days")
-  end
-
-  # AppStore provisioning profile
-  app_store = Spaceship::Portal.provisioning_profile.app_store.find_by_bundle_id(bundle_id: ENV['BUNDLE_IDENTIFIER']).first
-  app_store_days_before_expires = (app_store.expires - DateTime.now).to_i
-  puts("#{app_store.name} : expire dans #{app_store_days_before_expires} jours")
-
-  # AdHoc provisioning profile
-  ad_hoc = Spaceship::Portal.provisioning_profile.ad_hoc.find_by_bundle_id(bundle_id: ENV['BUNDLE_IDENTIFIER']).first
-  ad_hoc_days_before_expires = (ad_hoc.expires - DateTime.now).to_i
-  puts("#{ad_hoc.name} : expire dans #{ad_hoc_days_before_expires} jours")
 end
