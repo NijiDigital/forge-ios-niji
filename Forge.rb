@@ -59,7 +59,12 @@ lane :test do |options|
   use_html = options[:html] == true
 
   prepare
-  danger if is_ci?
+
+  if is_ci
+    danger(
+      dangerfile: DANGERFILE_PATH
+    )
+  end
 
   scan(
     workspace: ENV['XCWORKSPACE'],
@@ -227,7 +232,7 @@ end
 desc 'Import Loacalizable.string from POEditor'
 lane :poesie do
   poesie_path = File.realpath(Dir['../fastlane/Scripts/poesie.sh'][0])
-  sh('bash ' + poesie_path)
+  sh("bash #{poesie_path}")
 end
 
 ###########################
@@ -239,7 +244,7 @@ lane :swaggen do
   brew(command: 'install mint')
   sh('mint install yonaskolb/SwagGen')
   swaggen_path = File.realpath(Dir['../fastlane/Scripts/swaggen.sh'][0])
-  sh('bash ' + swaggen_path)
+  sh("bash #{swaggen_path}")
 end
 
 ###########################
