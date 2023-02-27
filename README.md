@@ -13,8 +13,10 @@ cd fastlane
 ```
 
 ```sh
-git submodule add git@github.com:NijiDigital/forge-ios-niji.git forge
+git submodule add https://github.com/NijiDigital/forge-ios-niji.git forge
 ```
+
+/!\ Use the url HTTPS for the CI/CD /!\
 
 Add import in your Fastfile
 
