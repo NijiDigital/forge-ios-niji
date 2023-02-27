@@ -63,7 +63,7 @@ lane :test do |options|
 
   before_test(options)
 
-  prepare
+  prepare(options)
 
   scan(
     workspace: ENV['XCWORKSPACE'],
@@ -83,12 +83,11 @@ end
 
 desc 'Build and archive the app'
 lane :archive do |options|
-  UI.user_error! 'You need to specify an environment (typically via --env) to use this lane' if ENV['CONFIGURATION'].nil?
 
   distribution_method = options[:enterprise] == true ? 'enterprise' : 'ad-hoc'
   export_method = options[:appstore] == true ? 'app-store' : distribution_method
 
-  prepare
+  prepare(options)
 
   set_build_number
 
@@ -164,12 +163,10 @@ end
 
 desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
-  UI.user_error! 'You need to specify an environment (typically via --env) to use this lane' if ENV['CONFIGURATION'].nil?
-
-  is_enterprise = options[:enterprise] == true
-
   archive(
-    enterprise: is_enterprise,
+    config: options[:config],
+    env: options[:env],
+    enterprise: options[:enterprise],
     appstore: false
   )
 
@@ -183,8 +180,7 @@ lane :ota do |options|
 end
 
 desc 'Submit a new Beta Build to Apple TestFlight'
-lane :beta do
-  UI.user_error! 'You need to specify an environment (typically via --env) to use this lane' if ENV['CONFIGURATION'].nil?
+lane :beta do |options|
 
   archive(
     enterprise: false,
@@ -203,7 +199,7 @@ end
 ###########################
 
 desc "Install all metrics tools"
-lane :install_metrics_tools do
+private_lane :install_metrics_tools do
   sh('pip install mobsfscan')
   brew(command: 'install swiftlint')
   brew(command: 'install peripheryapp/periphery/periphery')
