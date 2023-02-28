@@ -67,10 +67,10 @@ ENV['SWAGGEN_PATH'] = ''.freeze
 
 ## Options Fastlane
 
-- `badge:` = true if adding a badge to the application icon (true or false or never)
-- `env:` = define the environment use (dev, prod, stagging...)
-- `config:` = define the xcconfig file use (Debug, InHouse, Release...)
-- `enterprise:` = true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
+- `badge:` : true if adding a badge to the application icon (true or false or never)
+- `env:` : define the environment use (dev, prod, stagging...)
+- `config:` : define the xcconfig file use (Debug, InHouse, Release...)
+- `enterprise:` : true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
 
 for example :
 
