@@ -166,6 +166,7 @@ lane :ota do |options|
 
   firebase_app_distribution(
     app: ENV.fetch('FIREBASE_APP', nil),
+    ipa_path: ENV.fetch('IPA_OUTPUT_DIR', nil),
     release_notes: changelog,
     firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil)
   )
