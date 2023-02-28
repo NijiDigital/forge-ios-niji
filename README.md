@@ -2,7 +2,7 @@
 
 Set of best practices to have when developing in an iOS project
 
-## Install
+## Installation
 
 ```sh
 bundle exec fastlane init
