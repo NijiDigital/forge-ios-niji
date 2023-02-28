@@ -33,17 +33,10 @@ forge_path = File.join(File.dirname(__FILE__), 'fastlane', 'forge', 'Forgefile')
 eval_gemfile(forge_path) if File.exist?(forge_path)
 ```
 
-## Options Fastlane
+In your `.swiftlint.yml` file from your project, add this line :
 
-- `badge:` = true if adding a badge to the application icon (true or false or never)
-- `env:` = define the environment use (dev, prod, stagging...)
-- `config:` = define the xcconfig file use (Debug, InHouse, Release...)
-- `enterprise:` = true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
-
-for example :
-
-```sh
-bundle exec fastlane archive env:dev config:InHouse enterprise:true badge:true
+```yml
+parent_config: fastlane/forge/.swiftlint_base.yml
 ```
 
 ## Environment Variables
@@ -72,10 +65,15 @@ ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
 ```
 
-## SwiftLint
+## Options Fastlane
 
-In your `.swiftlint.yml` file from your project, add this line :
+- `badge:` = true if adding a badge to the application icon (true or false or never)
+- `env:` = define the environment use (dev, prod, stagging...)
+- `config:` = define the xcconfig file use (Debug, InHouse, Release...)
+- `enterprise:` = true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
 
-```yml
-parent_config: fastlane/forge/.swiftlint_base.yml
+for example :
+
+```sh
+bundle exec fastlane archive env:dev config:InHouse enterprise:true badge:true
 ```
