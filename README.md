@@ -1,4 +1,4 @@
-# forge-ios-niji
+# Forge iOS by Niji
 
 Set of best practices to have when developing in an iOS project
 
