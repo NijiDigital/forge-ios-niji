@@ -160,10 +160,13 @@ end
 
 desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
+  config = options[:config] || ENV.fetch('CONFIGURATION', nil)
+  env = options[:env] || ENV.fetch('APP_ENVIRONMENT', nil)
+  is_enterprise = options[:enterprise] == true
   archive(
-    config: options[:config],
-    env: options[:env],
-    enterprise: options[:enterprise],
+    config: config,
+    env: env,
+    enterprise: is_enterprise,
     appstore: false
   )
 
@@ -178,8 +181,11 @@ end
 
 desc 'Submit a new Beta Build to Apple TestFlight'
 lane :beta do |options|
-
+  config = options[:config] || ENV.fetch('CONFIGURATION', nil)
+  env = options[:env] || ENV.fetch('APP_ENVIRONMENT', nil)
   archive(
+    config: config,
+    env: env,
     enterprise: false,
     appstore: true
   )
