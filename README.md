@@ -60,3 +60,11 @@ ENV['FIREBASE_CLI_TOKEN'] = ''
 
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
+
+## SwiftLint
+
+In your `.swiftlint.yml` file from your project, add this line :
+
+```sh
+parent_config: fastlane/forge/.swiftlint_base.yml
+```
