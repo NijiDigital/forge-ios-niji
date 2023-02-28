@@ -219,7 +219,7 @@ end
 # Poesie                  #
 ###########################
 
-desc 'Import Loacalizable.string from POEditor'
+desc 'Import Localizable.string from POEditor'
 lane :poesie do
   sh("bash #{ENV['POESIE_PATH']}")
 end
