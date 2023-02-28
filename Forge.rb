@@ -160,15 +160,7 @@ end
 
 desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
-  config = options[:config] || ENV.fetch('CONFIGURATION', nil)
-  env = options[:env] || ENV.fetch('APP_ENVIRONMENT', nil)
-  is_enterprise = options[:enterprise] == true
-  archive(
-    config: config,
-    env: env,
-    enterprise: is_enterprise,
-    appstore: false
-  )
+  archive(options)
 
   changelog = '' # TODO
 
@@ -181,14 +173,9 @@ end
 
 desc 'Submit a new Beta Build to Apple TestFlight'
 lane :beta do |options|
-  config = options[:config] || ENV.fetch('CONFIGURATION', nil)
-  env = options[:env] || ENV.fetch('APP_ENVIRONMENT', nil)
-  archive(
-    config: config,
-    env: env,
-    enterprise: false,
-    appstore: true
-  )
+  options[:appstore] = true
+  
+  archive(options)
 
   pilot(
     api_key_path: ENV.fetch('API_KEY_PATH', nil),
