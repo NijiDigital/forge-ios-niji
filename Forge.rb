@@ -39,7 +39,9 @@ end
 desc 'Generate project and install pods'
 lane :prepare do |options|
   before_prepare(options)
-  xcodegen(spec: ENV.fetch('XCODEGEN_PATH', nil))
+  unless ENV['XCODEGEN_PATH'].nil?
+    xcodegen(spec: ENV['XCODEGEN_PATH'])
+  end
   cocoapods
   after_prepare(options)
 end
@@ -63,8 +65,8 @@ lane :test do |options|
     clean: false,
     result_bundle: true,
     code_coverage: true,
-    derived_data_path: ENV.fetch('DERIVED_DATA_PATH'),
-    output_directory: ENV.fetch('REPORTS_PATH')
+    derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
+    output_directory: ENV.fetch('REPORTS_PATH', nil),
   )
 
   after_test(options)
@@ -99,7 +101,8 @@ lane :archive do |options|
     sdk: 'iphoneos',
     silent: true,
     clean: false,
-    output_directory: ENV.fetch('IPA_OUTPUT_DIR', nil)
+    build_path: ENV.fetch('BUILD_PATH', nil),
+    output_directory: ENV.fetch('BUILD_PATH', nil)
   )
 end
 
@@ -165,8 +168,7 @@ lane :ota do |options|
   changelog = '' # TODO
 
   firebase_app_distribution(
-    app: ENV.fetch('FIREBASE_APP', nil),
-    ipa_path: ENV.fetch('IPA_OUTPUT_DIR', nil),
+    googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
     release_notes: changelog,
     firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil)
   )

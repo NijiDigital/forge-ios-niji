@@ -44,7 +44,7 @@ List of environment variables to use in your Fastfile
 ENV['API_KEY_PATH'] = ''.freeze # https://docs.fastlane.tools/app-store-connect-api/
 ENV['APP_VERSION_PATH'] = ''.freeze
 ENV['DERIVED_DATA_PATH'] = './DerivedData'.freeze
-ENV['IPA_OUTPUT_DIR'] = './Build'.freeze
+ENV['BUILD_PATH'] = './Build'.freeze
 ENV['REPORTS_PATH'] = './Reports'.freeze
 ENV['PLIST_PATH'] = ''.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
@@ -55,7 +55,7 @@ ENV['SCHEME'] = 'Shiva'
 ENV['APP_NAME'] = 'Shiva'
 ENV['TARGET'] = 'Shiva'
 
-ENV['FIREBASE_APP'] = ''
+ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = '' # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
 ENV['FIREBASE_CLI_TOKEN'] = ''
 
 ENV['POESIE_PATH'] = ''.freeze
