@@ -59,11 +59,11 @@ ENV['REPORTS_PATH'] = './Reports'.freeze
 ENV['PLIST_PATH'] = ''.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 
-ENV['XCWORKSPACE'] = 'Shiva.xcworkspace'.freeze
-ENV['XCPROJECT'] = 'Shiva.xcodeproj'.freeze
-ENV['SCHEME'] = 'Shiva'
-ENV['APP_NAME'] = 'Shiva'
-ENV['TARGET'] = 'Shiva'
+ENV['XCWORKSPACE'] = 'NAME.xcworkspace'.freeze
+ENV['XCPROJECT'] = 'NAME.xcodeproj'.freeze
+ENV['SCHEME'] = ''
+ENV['APP_NAME'] = ''
+ENV['TARGET'] = ''
 
 ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = '' # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
 ENV['FIREBASE_CLI_TOKEN'] = ''
