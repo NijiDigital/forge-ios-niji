@@ -18,10 +18,19 @@ git submodule add https://github.com/NijiDigital/forge-ios-niji.git forge
 
 /!\ Use the url HTTPS for the CI/CD /!\
 
-Add import in your Fastfile
+Add import in your `Fastfile` :
 
 ```ruby
 import 'forge/Forge.rb'
+```
+
+Then add `Forgefile` dependencies in your `Gemfile` :
+
+```ruby
+# Add these lines at the bottom of the Gemfile
+
+forge_path = File.join(File.dirname(__FILE__), 'fastlane', 'forge', 'Forgefile')
+eval_gemfile(forge_path) if File.exist?(forge_path)
 ```
 
 ## Options Fastlane
@@ -41,6 +50,7 @@ bundle exec fastlane archive env:dev config:InHouse enterprise:true badge:true
 
 List of environment variables to use in your Fastfile
 
+```ruby
 ENV['API_KEY_PATH'] = ''.freeze # https://docs.fastlane.tools/app-store-connect-api/
 ENV['APP_VERSION_PATH'] = ''.freeze
 ENV['DERIVED_DATA_PATH'] = './DerivedData'.freeze
@@ -60,11 +70,12 @@ ENV['FIREBASE_CLI_TOKEN'] = ''
 
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
+```
 
 ## SwiftLint
 
 In your `.swiftlint.yml` file from your project, add this line :
 
-```sh
+```yml
 parent_config: fastlane/forge/.swiftlint_base.yml
 ```
