@@ -63,6 +63,7 @@ lane :test do |options|
     workspace: ENV.fetch('XCWORKSPACE', nil),
     scheme: ENV.fetch('SCHEME', nil),
     clean: false,
+    output_types: 'html,junit',
     result_bundle: true,
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
