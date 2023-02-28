@@ -35,10 +35,10 @@ eval_gemfile(forge_path) if File.exist?(forge_path)
 
 ## Options Fastlane
 
-`badge:` = true if adding a badge to the application icon (true or false or never)
-`env:` = define the environment use (dev, prod, stagging...)
-`config:` = define the xcconfig file use (Debug, InHouse, Release...)
-`enterprise:` = true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
+- `badge:` = true if adding a badge to the application icon (true or false or never)
+- `env:` = define the environment use (dev, prod, stagging...)
+- `config:` = define the xcconfig file use (Debug, InHouse, Release...)
+- `enterprise:` = true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
 
 for example :
 
@@ -48,7 +48,7 @@ bundle exec fastlane archive env:dev config:InHouse enterprise:true badge:true
 
 ## Environment Variables
 
-List of environment variables to use in your Fastfile
+List of environment variables to use in your `Fastfile`
 
 ```ruby
 ENV['API_KEY_PATH'] = ''.freeze # https://docs.fastlane.tools/app-store-connect-api/
