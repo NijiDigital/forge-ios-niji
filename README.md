@@ -44,13 +44,14 @@ parent_config: fastlane/forge/.swiftlint_base.yml
 List of environment variables to use in your `Fastfile`
 
 ```ruby
+# Obligatory
+
 ENV['API_KEY_PATH'] = ''.freeze # https://docs.fastlane.tools/app-store-connect-api/
 ENV['APP_VERSION_PATH'] = ''.freeze
 ENV['DERIVED_DATA_PATH'] = './DerivedData'.freeze
 ENV['BUILD_PATH'] = './Build'.freeze
 ENV['REPORTS_PATH'] = './Reports'.freeze
 ENV['PLIST_PATH'] = ''.freeze
-ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 
 ENV['XCWORKSPACE'] = 'NAME.xcworkspace'.freeze
 ENV['XCPROJECT'] = 'NAME.xcodeproj'.freeze
@@ -61,6 +62,9 @@ ENV['TARGET'] = ''
 ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = '' # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
 ENV['FIREBASE_CLI_TOKEN'] = '' # Move this variable in file ".env" at the root of the fastlane folder because this variable is sensible 
 
+# Optional
+
+ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
 ```
@@ -77,3 +81,10 @@ for example :
 ```sh
 bundle exec fastlane archive env:dev config:InHouse enterprise:true badge:true
 ```
+
+## Override method Fastlane
+
+- `config`
+- `switch_to_env`
+- `before_prepare`
+- `after_prepare`

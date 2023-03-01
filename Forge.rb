@@ -27,6 +27,16 @@ lane :install_developer_tools do
   brew(command: 'install swiftformat')
 end
 
+desc 'Prepare configuration'
+lane :config do |options|
+  # override method
+end
+
+desc 'Switch to the specified environment'
+lane :switch_to_env do |options|
+  # override method
+end
+
 ###########################
 # Prepare                 #
 ###########################
@@ -38,10 +48,19 @@ end
 
 desc 'Generate project and install pods'
 lane :prepare do |options|
+  install_developer_tools
   before_prepare(options)
-  unless ENV['XCODEGEN_PATH'].nil?
-    xcodegen(spec: ENV['XCODEGEN_PATH'])
-  end
+
+  switch_to_env(options) if options[:env]
+
+  config(options) if options[:config]
+
+  swaggen(options) unless ENV['SWAGGEN_PATH'].nil?
+
+  swiftgen unless ENV['SWIFTGEN_PATH'].nil?
+
+  xcodegen(spec: ENV['XCODEGEN_PATH']) unless ENV['XCODEGEN_PATH'].nil?
+
   cocoapods
   after_prepare(options)
 end
@@ -67,12 +86,10 @@ lane :test do |options|
     result_bundle: true,
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
-    output_directory: ENV.fetch('REPORTS_PATH', nil),
+    output_directory: ENV.fetch('REPORTS_PATH', nil)
   )
 
-  unless ENV['DANGERFILE_PATH'].nil?
-    danger(dangerfile: ENV['DANGERFILE_PATH'])
-  end
+  danger(dangerfile: ENV['DANGERFILE_PATH']) unless ENV['DANGERFILE_PATH'].nil?
 
   after_test(options)
 end
@@ -87,7 +104,6 @@ end
 
 desc 'Build and archive the app'
 lane :archive do |options|
-
   distribution_method = options[:enterprise] == true ? 'enterprise' : 'ad-hoc'
   export_method = options[:appstore] == true ? 'app-store' : distribution_method
 
@@ -182,7 +198,7 @@ end
 desc 'Submit a new Beta Build to Apple TestFlight'
 lane :beta do |options|
   options[:appstore] = true
-  
+
   archive(options)
 
   pilot(
@@ -234,6 +250,16 @@ lane :swaggen do
   brew(command: 'install mint')
   sh('mint install yonaskolb/SwagGen')
   sh("bash #{ENV['SWAGGEN_PATH']}")
+end
+
+# SwiftGen
+
+desc 'Generate assets with SwiftGen'
+lane :swiftgen do
+  Dir.chdir("..") do
+    brew(command: 'install swiftgen')
+    sh("swiftgen config run --config #{ENV['SWIFTGEN_PATH']}")
+  end
 end
 
 ###########################
