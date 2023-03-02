@@ -82,7 +82,7 @@ lane :test do |options|
     workspace: ENV.fetch('XCWORKSPACE', nil),
     scheme: ENV.fetch('SCHEME', nil),
     clean: false,
-    output_types: 'html,junit',
+    output_types: 'junit',
     result_bundle: true,
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
@@ -221,9 +221,8 @@ private_lane :install_metrics_tools do
 end
 
 desc "Send all metrics to Sonar"
-lane :send_metrics do
-  prepare
-  test
+lane :send_metrics do |options|
+  test(options)
   install_metrics_tools
   version = get_version_number(
     xcodeproj: ENV.fetch('XCPROJECT', nil),
