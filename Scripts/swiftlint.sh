@@ -1,9 +1,10 @@
 #!/bin/sh
 
+export PATH="$PATH:/opt/homebrew/bin"
 if [ "${CONFIGURATION}" == "Debug" ]; then
-  if which "${PODS_ROOT}/SwiftLint/swiftlint" >/dev/null; then
-    echo "Running SwiftLint"
-    "${PODS_ROOT}/SwiftLint/swiftlint"
+  echo "Running SwiftLint"
+  if which swiftlint > /dev/null; then
+    swiftlint
   else
     echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
   fi
