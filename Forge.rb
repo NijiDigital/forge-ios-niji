@@ -11,20 +11,23 @@ fastlane_require 'fastlane-plugin-xcodegen'
 
 desc 'Install developer tools'
 lane :install_developer_tools do
-  # Installe rbenv pour l'initialisation de ruby dans le projet
+  # Install rbenv for initializing ruby in the project
   brew(command: 'install rbenv')
 
-  # Installe ruby-build, un plugin de rbenv pour installer facilement n'importe quelle version de ruby
+  # Install ruby-build, an rbenv plugin to easily install any version of ruby
   brew(command: 'install ruby-build')
 
-  # Installe pyenv pour l'initialisation de python dans le projet
+  # Install pyenv for python initialization in the project
   brew(command: 'install pyenv')
 
-  # Installe swiftlint
+  # Install swiftlint
   brew(command: 'install swiftlint')
 
-  # Installe swiftformat
+  # Install swiftformat
   brew(command: 'install swiftformat')
+
+  # Install periphery
+  brew(command: 'install peripheryapp/periphery/periphery')
 end
 
 desc 'Prepare configuration'
@@ -109,7 +112,7 @@ lane :archive do |options|
 
   prepare(options)
 
-  set_build_number
+  set_build_number unless ENV['PLIST_PATH'].nil?
 
   badge_icon
 
@@ -186,7 +189,7 @@ desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
 
-  changelog = '' # TODO
+  changelog = ENV['CHANGELOG'].nil? ? ENV['CHANGELOG'] : ''
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
@@ -201,8 +204,13 @@ lane :beta do |options|
 
   archive(options)
 
+  app_store_connect_api_key(
+    key_id: ENV.fetch('KEY_ID', nil),
+    issuer_id: ENV.fetch('ISSUER_ID', nil),
+    key_filepath: "#{ENV['GENERIC_FILE_STORAGE']}/AuthKey_#{ENV['KEY_ID']}.p8"
+  )
+
   pilot(
-    api_key_path: ENV.fetch('API_KEY_PATH', nil),
     skip_submission: true,
     skip_waiting_for_build_processing: true
   )
@@ -215,8 +223,6 @@ end
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
   sh('pip install mobsfscan')
-  brew(command: 'install swiftlint')
-  brew(command: 'install peripheryapp/periphery/periphery')
   brew(command: 'install sonar-scanner')
 end
 
@@ -251,7 +257,9 @@ lane :swaggen do
   sh("bash #{ENV['SWAGGEN_PATH']}")
 end
 
-# SwiftGen
+###########################
+# SwiftGen                #
+###########################
 
 desc 'Generate assets with SwiftGen'
 lane :swiftgen do

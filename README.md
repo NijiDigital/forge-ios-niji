@@ -57,16 +57,21 @@ ENV['XCWORKSPACE'] = 'NAME.xcworkspace'.freeze
 ENV['XCPROJECT'] = 'NAME.xcodeproj'.freeze
 ENV['SCHEME'] = ''
 ENV['APP_NAME'] = ''
-ENV['TARGET'] = ''
+ENV['TARGET'] = '' # For launch the lane send_metrics
 
-ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = '' # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
+# Firebase
+ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = 'GoogleService-Info.plist'.freeze # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
 ENV['FIREBASE_CLI_TOKEN'] = '' # Move this variable in file ".env" at the root of the fastlane folder because this variable is sensible 
 
-# Optional
+# App Store Connect
+ENV['KEY_ID'] = ''.freeze
+ENV['ISSUER_ID'] = ''.freeze
 
+# Optional
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
+ENV['CHANGELOG'] = File.read('CHANGELOG.md')
 ```
 
 ## Options Fastlane
