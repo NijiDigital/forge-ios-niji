@@ -67,7 +67,13 @@ ENV['FIREBASE_CLI_TOKEN'] = '' # Move this variable in file ".env" at the root o
 ENV['KEY_ID'] = ''.freeze
 ENV['ISSUER_ID'] = ''.freeze
 
+# Danger
+ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
+ENV['MIN_XCOV_PERCENTAGE'] = '0.00'.freeze
+ENV['JIRA_REF'] = '/(\b((JIRA)-)|#)[0-9]+\b/i'.freeze
+
 # Optional
+ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze

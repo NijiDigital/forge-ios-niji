@@ -1,9 +1,41 @@
-fastlane_require 'fastlane-plugin-badge'
-fastlane_require 'fastlane-plugin-brew'
-fastlane_require 'fastlane-plugin-changelog'
-fastlane_require 'fastlane-plugin-firebase_app_distribution'
-fastlane_require 'fastlane-plugin-xcconfig'
-fastlane_require 'fastlane-plugin-xcodegen'
+###########################
+# Overrides methods       #
+###########################
+
+before_all do
+  UI.user_error! 'You must run fastlane using `bundle exec fastlane`' if ENV['BUNDLE_GEMFILE'].nil?
+
+  update_fastlane
+
+  fastlane_require 'fastlane-plugin-badge'
+  fastlane_require 'fastlane-plugin-brew'
+  fastlane_require 'fastlane-plugin-changelog'
+  fastlane_require 'fastlane-plugin-firebase_app_distribution'
+  fastlane_require 'fastlane-plugin-xcconfig'
+  fastlane_require 'fastlane-plugin-xcodegen'
+end
+
+after_all do |lane|
+  next if is_ci
+
+  notification(
+    title: "✅ fastlane #{lane}",
+    message: "Configuration: #{ENV['CONFIGURATION'] || '(none)'}",
+    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
+    sound: 'default'
+  )
+end
+
+error do |lane, exception|
+  next if is_ci
+
+  notification(
+    title: "🛑 fastlane #{lane}",
+    message: "Error: #{exception}",
+    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
+    sound: 'hero'
+  )
+end
 
 ###########################
 # Requirement             #

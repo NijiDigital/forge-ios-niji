@@ -16,25 +16,8 @@ markdown [
   '🔄 I will update this comment as you push new commits; so come here to see me again later!'
 ]
 
-###########################
-# Variables
-###########################
-
-files_to_check = (git.modified_files + git.added_files).uniq
-files_to_lint = (git.modified_files - git.deleted_files) + git.added_files
-
-has_usecase_changes = !git.modified_files.grep(/UseCases/).empty?
-has_usecase_creates = !git.added_files.grep(/UseCases/).empty?
-has_test_changes = !git.modified_files.grep(/UnitTests/).empty?
-has_test_creates = !git.added_files.grep(/UnitTests/).empty?
-
-jira_ref = /(\b((HP|HSA)-)|#)[0-9]+\b/i
-entry_re = Regexp.new("^\\+\\* #{jira_ref}")
-
-xcresult_path = 'reports/Socle.xcresult'
-
 #######################################
-# Check CHANGELOG entry & App Version
+# Check CHANGELOG entry & App Version #
 #######################################
 
 release_info = gitlab.branch_for_head.match(%r{^(release)/(.*)$})
@@ -42,12 +25,12 @@ if release_info && gitlab.branch_for_base == 'master'
 
   ## MR from Release Branch to Master Branch? ##
 
-  # Check that GLOBAL_APP_VERSION matches branch name
-  version_in_settings = target.build_settings('Release')['GLOBAL_APP_VERSION'] || project.build_settings('Release')['GLOBAL_APP_VERSION']
+  # Check that APP_VERSION matches branch name
+  version_in_settings = target.build_settings('Release')['APP_VERSION'] || project.build_settings('Release')['APP_VERSION']
   if version_in_settings == release_info[2]
     message("You're about to merge a new release `#{release_info[2]}` to master 👍")
   else
-    raise("You're about to merge a new release `#{release_info[2]}`, but `GLOBAL_APP_VERSION` is set to `#{version_in_settings}` in your build settings!")
+    raise("You're about to merge a new release `#{release_info[2]}`, but `APP_VERSION` is set to `#{version_in_settings}` in your build settings!")
   end
 
   # Some informative instructions when targetting master or develop
@@ -70,84 +53,99 @@ else
   warn('Please include an entry in the CHANGELOG.md') unless git.modified_files.include?('CHANGELOG.md')
 
   # Check there is a JIRA reference in the MR title, body or branch name
-  unless [gitlab.mr_title, gitlab.mr_body].any? { |t| t.match(jira_ref) }
-    m = gitlab.branch_for_head.match(jira_ref)
-    if m.nil?
-      message('No JIRA reference found in title, description or branch name.')
-    else
-      message("Branch name seems to reference #{m[0].upcase}")
+  unless ENV['JIRA_REF'].nil?
+    unless [gitlab.mr_title, gitlab.mr_body].any? { |t| t.match(ENV['JIRA_REF']) }
+      m = gitlab.branch_for_head.match(ENV['JIRA_REF'])
+      if m.nil?
+        message('No JIRA reference found in title, description or branch name.')
+      else
+        message("Branch name seems to reference #{m[0].upcase}")
+      end
     end
   end
 end
 
-#######################################
-# Notifies when the Podfile has been updated
-#######################################
+##############################################
+# Notifies when the Podfile has been updated # 
+##############################################
 
-warn("The Podfile was updated 🫘") unless git.modified_files.include?('Podfile')
+message("The Podfile was updated 🫘") unless git.modified_files.include?('Podfile')
 
-#######################################
-# Notifies when the Gemfile has been updated
-#######################################
+##############################################
+# Notifies when the Gemfile has been updated #
+##############################################
 
-warn('The Gemfile was updated 💎') unless git.modified_files.include?('Gemfile')
+message('The Gemfile was updated 💎') unless git.modified_files.include?('Gemfile')
 
-#######################################
-# Notifies when the Brewfile has been updated
-#######################################
-
-warn('The Brewfile was updated 🍺') unless git.modified_files.include?('Brewfile')
-
-#######################################
-# Notifies when duplicate localizable strings
-#######################################
-
-duplicate_localizable_strings.check_localizable_duplicates
-
-#######################################
-# Merge request size
-#######################################
+######################
+# Merge request size #
+######################
 
 warn('Big MR') if git.lines_of_code > 500
 
-#######################################
-# Merge request title validation
-#######################################
+##################################
+# Merge request title validation #
+##################################
 
 warn('MR is classed as Work in Progress') if gitlab.mr_title.include? '[WIP]' || gitlab.mr_title.starts_with?('WIP')
 
-# warn('MR title is too short.') if gitlab.mr_title.count < 5
+########################################################
+# Files changed and created should includes unit tests #
+########################################################
 
-#######################################
-# Files changed and created should includes unit tests
-#######################################
+has_usecase_changes = !git.modified_files.grep(/UseCases/).empty?
+has_usecase_creates = !git.added_files.grep(/UseCases/).empty?
+has_test_changes = !git.modified_files.grep(/UnitTests/).empty?
+has_test_creates = !git.added_files.grep(/UnitTests/).empty?
 
 warn('Tests were not updated', sticky: false) if has_usecase_changes && !has_test_changes && git.lines_of_code > 20
-
 warn('Tests were not added', sticky: false) if has_usecase_creates && !has_test_creates && git.lines_of_code > 20
 
-#######################################
-# Merge request description validation
-#######################################
+########################################
+# Merge request description validation #
+########################################
 
 # Mainly to encourage writing up some reasoning about the MR, rather than just leaving a title.
 failure 'Please provide a summary in the Merge Request description' if gitlab.mr_body.length < 5
 
-#######################################
-# Merge request should have at least one label
-#######################################
+################################################
+# Merge request should have at least one label #
+################################################
 
-failure "MR should have at least one label. 🏷'" if gitlab.mr_labels.empty?
+warn "MR should have at least one label. 🏷'" if gitlab.mr_labels.empty?
 
-#######################################
-# Ensure that all MRs have an assignee
-#######################################
+########################################
+# Ensure that all MRs have an assignee #
+########################################
 
 warn 'This MR does not have any assignees yet.' unless gitlab.mr_json['assignee']
 
-#######################################
-# File Checks
-#######################################
+###############
+# File Checks #
+###############
+
+#### HELPER METHODS
+
+def lineContainsPublicPropertyMethodClassOrStruct(line)
+	if lineIsPropertyMethodClassOrStruct(line) and line.include?("public")
+		return true
+	end
+	return false
+end
+
+def lineIsPropertyMethodClassOrStruct(line)
+	if line.include?("var") or line.include?("let") or line.include?("func") or line.include?("class") or line.include?("struct")
+		return true
+	end
+	return false
+end
+
+def lineIncludesDocumentComment(line)
+	if line.include?("///") or line.include?("*/")
+		return true
+	end
+	return false
+end
 
 # Checks for certain rules and warns if needed.
 # Some rules can be disabled by using // danger:disable rule_name
@@ -160,6 +158,7 @@ warn 'This MR does not have any assignees yet.' unless gitlab.mr_json['assignee'
 # - Check for public properties or methods which aren't documented (public_docs)
 
 # Sometimes an added file is also counted as modified. We want the files to be checked only once.
+files_to_check = (git.modified_files + git.added_files).uniq
 (files_to_check - %w[Dangerfile]).each do |file|
   next unless File.file?(file)
   # Only check for classes inside swift files
@@ -187,16 +186,26 @@ warn 'This MR does not have any assignees yet.' unless gitlab.mr_json['assignee'
       # Start our custom line checks
       ## Check for the usage of final class
       if (disabled_rules.include?('final_class') == false) && line.include?('class') && !line.include?('final') && !line.include?('func') && !line.include?('//') && !line.include?('protocol')
-        warn('Consider using final for this class or use a struct (final_class)') # , file:, line: index + 1)
+        warn("Consider using final for this class or use a struct (final_class)", file: file, line: index+1)
       end
 
+      ## Check for the usage of unowned self
+			if line.include?("unowned self")
+				warn("It's safer to use weak instead of unowned", file: file, line: index+1) 
+			end
+      
       ## Check for methods that only call the super class' method
       if line.include?('override') && line.include?('func') && filelines[index + 1].include?('super') && filelines[index + 2].include?('}')
-        warn('Override methods which only call super can be removed') # , file:, line: index + 3)
+        warn("Override methods which only call super can be removed", file: file, line: index+3) 
       end
 
       ## Check if our line includes a MARK:
       foundMark = true if line.include?('MARK:') && line.include?('//')
+
+      ## Check for public properties which aren't commented
+			if disabled_rules.include?("public_docs") == false and lineContainsPublicPropertyMethodClassOrStruct(line) && lineIncludesDocumentComment(filelines[index-1]) == false
+				warn("Public properties, methods, classes or structs should be documented. Make use of `///` or `/* */` so it will show up inside the docs. (public_docs)", file: file, line: index+1) 
+			end
     end
   end
 
@@ -206,53 +215,48 @@ warn 'This MR does not have any assignees yet.' unless gitlab.mr_json['assignee'
   end
 end
 
-#######################################
-# Run SwiftFormat
-#######################################
+###################
+# Run SwiftFormat #
+###################
 
-swiftformat.binary_path = 'Pods/SwiftFormat/CommandLineTool/swiftformat'
+swiftformat.binary_path = '/usr/local/bin/swiftformat'
 swiftformat.check_format(fail_on_error: true)
 
-#######################################
-# Run SwiftLint on changed files
-#######################################
+##################################
+# Run SwiftLint on changed files #
+##################################
 
-swiftlint.binary_path = 'Pods/SwiftLint/swiftlint'
+swiftlint.binary_path = '/usr/local/bin/swiftlint'
 swiftlint.max_num_violations = 20
-swiftlint.verbose = true
-# NOTE: The argument "--force-exclude" is passed to SwiftLint by the danger-swiftlint plugin
-#       But this SwiftLint argument doesn't work properly & has issues.
-#       So instead, we re-disable it, and filter the list of files manually :-/
-files_to_lint.reject! { |f| f.start_with?('Pods/') }
-swiftlint.lint_files(files_to_lint,
-                     additional_swiftlint_args: '--no-force-exclude')
 
-#######################################
-# Run Xcov
-#######################################
+############
+# Run Xcov #
+############
 
-# Generate report
-report = xcov.produce_report(
-  scheme: 'Socle',
-  workspace: 'Socle.xcworkspace',
-  exclude_targets: 'Socle.app',
-  minimum_coverage_percentage: 90
+xcov.report(
+  workspace: ENV['XCWORKSPACE'],
+  scheme: ENV['SCHEME'],
+  minimum_coverage_percentage: ENV['MIN_XCOV_PERCENTAGE'].to_f,
+  include_targets: "#{ENV['APP_NAME']}.app",
+  xccov_file_direct_path: "#{ENV['REPORTS_PATH']}/#{ENV['SCHEME']}.xcresult"
 )
 
-# Do some custom filtering with the report here
+###########################
+# Display report UnitTest #
+###########################
 
-# Post markdown report
-xcov.output_report(report)
+junit.parse "#{ENV['REPORTS_PATH']}/report.junit"
+junit.report
 
-#######################################
-# Run xcode summary
-#######################################
+##################
+# Run periphery  #
+##################
 
-xcode_summary.ignored_files = 'Pods/**'
-xcode_summary.report = xcresult_path
-
-#######################################
-# Run xcprofiler
-#######################################
-
-# xcprofiler.report 'Socle'
+periphery.binary_path = '/usr/local/bin/periphery'
+periphery.scan(
+  workspace: ENV['XCWORKSPACE'],
+  schemes: ENV['SCHEME'],
+  targets: ENV['SCHEME'],
+  skip_build: true,
+  index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
+)
