@@ -53,20 +53,18 @@ else
   warn('Please include an entry in the CHANGELOG.md') unless git.modified_files.include?('CHANGELOG.md')
 
   # Check there is a JIRA reference in the MR title, body or branch name
-  unless ENV['JIRA_REF'].nil?
-    unless [gitlab.mr_title, gitlab.mr_body].any? { |t| t.match(ENV['JIRA_REF']) }
-      m = gitlab.branch_for_head.match(ENV['JIRA_REF'])
-      if m.nil?
-        message('No JIRA reference found in title, description or branch name.')
-      else
-        message("Branch name seems to reference #{m[0].upcase}")
-      end
+  if !ENV['JIRA_REF'].nil? && [gitlab.mr_title, gitlab.mr_body].none? { |t| t.match(ENV['JIRA_REF']) }
+    m = gitlab.branch_for_head.match(ENV['JIRA_REF'])
+    if m.nil?
+      message('No JIRA reference found in title, description or branch name.')
+    else
+      message("Branch name seems to reference #{m[0].upcase}")
     end
   end
 end
 
 ##############################################
-# Notifies when the Podfile has been updated # 
+# Notifies when the Podfile has been updated #
 ##############################################
 
 message("The Podfile was updated 🫘") unless git.modified_files.include?('Podfile')
@@ -126,25 +124,28 @@ warn 'This MR does not have any assignees yet.' unless gitlab.mr_json['assignee'
 
 #### HELPER METHODS
 
-def lineContainsPublicPropertyMethodClassOrStruct(line)
-	if lineIsPropertyMethodClassOrStruct(line) and line.include?("public")
-		return true
-	end
-	return false
+def line_contains_public_property_method_class_or_struct(line)
+  if line_is_property_method_class_or_struct(line) && line.include?("public")
+    return true
+  end
+
+  false
 end
 
-def lineIsPropertyMethodClassOrStruct(line)
-	if line.include?("var") or line.include?("let") or line.include?("func") or line.include?("class") or line.include?("struct")
-		return true
-	end
-	return false
+def line_is_property_method_class_or_struct(line)
+  if line.include?("var") || line.include?("let") || line.include?("func") || line.include?("class") || line.include?("struct")
+    return true
+  end
+
+  false
 end
 
-def lineIncludesDocumentComment(line)
-	if line.include?("///") or line.include?("*/")
-		return true
-	end
-	return false
+def line_includes_document_comment(line)
+  if line.include?("///") || line.include?("*/")
+    return true
+  end
+
+  false
 end
 
 # Checks for certain rules and warns if needed.
@@ -186,26 +187,26 @@ files_to_check = (git.modified_files + git.added_files).uniq
       # Start our custom line checks
       ## Check for the usage of final class
       if (disabled_rules.include?('final_class') == false) && line.include?('class') && !line.include?('final') && !line.include?('func') && !line.include?('//') && !line.include?('protocol')
-        warn("Consider using final for this class or use a struct (final_class)", file: file, line: index+1)
+        warn("Consider using final for this class or use a struct (final_class)", file: file, line: index + 1)
       end
 
       ## Check for the usage of unowned self
-			if line.include?("unowned self")
-				warn("It's safer to use weak instead of unowned", file: file, line: index+1) 
-			end
-      
+      if line.include?("unowned self")
+        warn("It's safer to use weak instead of unowned", file: file, line: index + 1)
+      end
+
       ## Check for methods that only call the super class' method
       if line.include?('override') && line.include?('func') && filelines[index + 1].include?('super') && filelines[index + 2].include?('}')
-        warn("Override methods which only call super can be removed", file: file, line: index+3) 
+        warn("Override methods which only call super can be removed", file: file, line: index + 3)
       end
 
       ## Check if our line includes a MARK:
       foundMark = true if line.include?('MARK:') && line.include?('//')
 
       ## Check for public properties which aren't commented
-			if disabled_rules.include?("public_docs") == false and lineContainsPublicPropertyMethodClassOrStruct(line) && lineIncludesDocumentComment(filelines[index-1]) == false
-				warn("Public properties, methods, classes or structs should be documented. Make use of `///` or `/* */` so it will show up inside the docs. (public_docs)", file: file, line: index+1) 
-			end
+      if (disabled_rules.include?("public_docs") == false) && line_contains_public_property_method_class_or_struct(line) && line_includes_document_comment(filelines[index - 1]) == false
+        warn("Public properties, methods, classes or structs should be documented. Make use of `///` or `/* */` so it will show up inside the docs. (public_docs)", file: file, line: index + 1)
+      end
     end
   end
 

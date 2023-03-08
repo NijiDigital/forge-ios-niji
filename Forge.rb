@@ -124,7 +124,7 @@ lane :test do |options|
     output_directory: ENV.fetch('REPORTS_PATH', nil)
   )
 
-  danger(dangerfile: ENV['DANGERFILE_PATH']) unless ENV['DANGERFILE_PATH'].nil?
+  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
 
   after_test(options)
 end
