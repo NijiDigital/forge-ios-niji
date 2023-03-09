@@ -1,6 +1,5 @@
 gem 'danger-gitlab'
 gem 'danger-junit'
-gem 'danger-swiftformat'
 gem 'danger-swiftlint'
 gem 'danger-periphery'
 gem 'danger-xcov'

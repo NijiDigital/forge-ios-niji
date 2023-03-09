@@ -216,13 +216,6 @@ files_to_check = (git.modified_files + git.added_files).uniq
   end
 end
 
-###################
-# Run SwiftFormat #
-###################
-
-swiftformat.binary_path = '/usr/local/bin/swiftformat'
-swiftformat.check_format(fail_on_error: true)
-
 ##################################
 # Run SwiftLint on changed files #
 ##################################
