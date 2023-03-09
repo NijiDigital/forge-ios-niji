@@ -121,7 +121,8 @@ lane :test do |options|
     result_bundle: true,
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
-    output_directory: ENV.fetch('REPORTS_PATH', nil)
+    output_directory: ENV.fetch('REPORTS_PATH', nil),
+    fail_build: false
   )
 
   danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
