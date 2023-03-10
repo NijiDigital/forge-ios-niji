@@ -46,7 +46,6 @@ List of environment variables to use in your `Fastfile`
 ```ruby
 # Obligatory
 
-ENV['API_KEY_PATH'] = ''.freeze # https://docs.fastlane.tools/app-store-connect-api/
 ENV['APP_VERSION_PATH'] = ''.freeze
 ENV['DERIVED_DATA_PATH'] = './DerivedData'.freeze
 ENV['BUILD_PATH'] = './Build'.freeze
@@ -72,7 +71,6 @@ ENV['ISSUER_ID'] = ''.freeze
 ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
 ENV['JIRA_REF'] = '/(\b((JIRA)-)|#)[0-9]+\b/i'.freeze
 ENV['XCOV_MIN_PERCENTAGE'] = '80.00'.freeze
-ENV['XCOV_INCLUDE_TARGETS'] = ''.freeze
 ENV['XCOV_IGNORE_FILE_PATH'] = '.xcovignore'.freeze
 
 # Optional
