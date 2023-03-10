@@ -1,9 +1,41 @@
-fastlane_require 'fastlane-plugin-badge'
-fastlane_require 'fastlane-plugin-brew'
-fastlane_require 'fastlane-plugin-changelog'
-fastlane_require 'fastlane-plugin-firebase_app_distribution'
-fastlane_require 'fastlane-plugin-xcconfig'
-fastlane_require 'fastlane-plugin-xcodegen'
+###########################
+# Overrides methods       #
+###########################
+
+before_all do
+  UI.user_error! 'You must run fastlane using `bundle exec fastlane`' if ENV['BUNDLE_GEMFILE'].nil?
+
+  update_fastlane
+
+  fastlane_require 'fastlane-plugin-badge'
+  fastlane_require 'fastlane-plugin-brew'
+  fastlane_require 'fastlane-plugin-changelog'
+  fastlane_require 'fastlane-plugin-firebase_app_distribution'
+  fastlane_require 'fastlane-plugin-xcconfig'
+  fastlane_require 'fastlane-plugin-xcodegen'
+end
+
+after_all do |lane|
+  next if is_ci
+
+  notification(
+    title: "✅ fastlane #{lane}",
+    message: "Configuration: #{ENV['CONFIGURATION'] || '(none)'}",
+    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
+    sound: 'default'
+  )
+end
+
+error do |lane, exception|
+  next if is_ci
+
+  notification(
+    title: "🛑 fastlane #{lane}",
+    message: "Error: #{exception}",
+    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
+    sound: 'hero'
+  )
+end
 
 ###########################
 # Requirement             #
@@ -11,20 +43,33 @@ fastlane_require 'fastlane-plugin-xcodegen'
 
 desc 'Install developer tools'
 lane :install_developer_tools do
-  # Installe rbenv pour l'initialisation de ruby dans le projet
+  # Install rbenv for initializing ruby in the project
   brew(command: 'install rbenv')
 
-  # Installe ruby-build, un plugin de rbenv pour installer facilement n'importe quelle version de ruby
+  # Install ruby-build, an rbenv plugin to easily install any version of ruby
   brew(command: 'install ruby-build')
 
-  # Installe pyenv pour l'initialisation de python dans le projet
+  # Install pyenv for python initialization in the project
   brew(command: 'install pyenv')
 
-  # Installe swiftlint
+  # Install swiftlint
   brew(command: 'install swiftlint')
 
-  # Installe swiftformat
+  # Install swiftformat
   brew(command: 'install swiftformat')
+
+  # Install periphery
+  brew(command: 'install peripheryapp/periphery/periphery')
+end
+
+desc 'Prepare configuration'
+lane :config do |options|
+  # override method
+end
+
+desc 'Switch to the specified environment'
+lane :switch_to_env do |options|
+  # override method
 end
 
 ###########################
@@ -38,10 +83,19 @@ end
 
 desc 'Generate project and install pods'
 lane :prepare do |options|
+  install_developer_tools
   before_prepare(options)
-  unless ENV['XCODEGEN_PATH'].nil?
-    xcodegen(spec: ENV['XCODEGEN_PATH'])
-  end
+
+  switch_to_env(options) if options[:env]
+
+  config(options) if options[:config]
+
+  swaggen(options) unless ENV['SWAGGEN_PATH'].nil?
+
+  swiftgen unless ENV['SWIFTGEN_PATH'].nil?
+
+  xcodegen(spec: ENV['XCODEGEN_PATH']) unless ENV['XCODEGEN_PATH'].nil?
+
   cocoapods
   after_prepare(options)
 end
@@ -63,16 +117,15 @@ lane :test do |options|
     workspace: ENV.fetch('XCWORKSPACE', nil),
     scheme: ENV.fetch('SCHEME', nil),
     clean: false,
-    output_types: 'html,junit',
+    output_types: 'junit',
     result_bundle: true,
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
     output_directory: ENV.fetch('REPORTS_PATH', nil),
+    fail_build: false
   )
 
-  unless ENV['DANGERFILE_PATH'].nil?
-    danger(dangerfile: ENV['DANGERFILE_PATH'])
-  end
+  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
 
   after_test(options)
 end
@@ -87,13 +140,12 @@ end
 
 desc 'Build and archive the app'
 lane :archive do |options|
-
   distribution_method = options[:enterprise] == true ? 'enterprise' : 'ad-hoc'
   export_method = options[:appstore] == true ? 'app-store' : distribution_method
 
   prepare(options)
 
-  set_build_number
+  set_build_number unless ENV['PLIST_PATH'].nil?
 
   badge_icon
 
@@ -170,7 +222,7 @@ desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
 
-  changelog = '' # TODO
+  changelog = ENV['CHANGELOG'].nil? ? ENV['CHANGELOG'] : ''
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
@@ -182,11 +234,16 @@ end
 desc 'Submit a new Beta Build to Apple TestFlight'
 lane :beta do |options|
   options[:appstore] = true
-  
+
   archive(options)
 
+  app_store_connect_api_key(
+    key_id: ENV.fetch('KEY_ID', nil),
+    issuer_id: ENV.fetch('ISSUER_ID', nil),
+    key_filepath: "#{ENV['GENERIC_FILE_STORAGE']}/AuthKey_#{ENV['KEY_ID']}.p8"
+  )
+
   pilot(
-    api_key_path: ENV.fetch('API_KEY_PATH', nil),
     skip_submission: true,
     skip_waiting_for_build_processing: true
   )
@@ -199,15 +256,12 @@ end
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
   sh('pip install mobsfscan')
-  brew(command: 'install swiftlint')
-  brew(command: 'install peripheryapp/periphery/periphery')
   brew(command: 'install sonar-scanner')
 end
 
 desc "Send all metrics to Sonar"
-lane :send_metrics do
-  prepare
-  test
+lane :send_metrics do |options|
+  test(options)
   install_metrics_tools
   version = get_version_number(
     xcodeproj: ENV.fetch('XCPROJECT', nil),
@@ -234,6 +288,18 @@ lane :swaggen do
   brew(command: 'install mint')
   sh('mint install yonaskolb/SwagGen')
   sh("bash #{ENV['SWAGGEN_PATH']}")
+end
+
+###########################
+# SwiftGen                #
+###########################
+
+desc 'Generate assets with SwiftGen'
+lane :swiftgen do
+  Dir.chdir("..") do
+    brew(command: 'install swiftgen')
+    sh("swiftgen config run --config #{ENV['SWIFTGEN_PATH']}")
+  end
 end
 
 ###########################
