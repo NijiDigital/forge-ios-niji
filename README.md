@@ -57,6 +57,7 @@ ENV['XCWORKSPACE'] = 'NAME.xcworkspace'.freeze
 ENV['XCPROJECT'] = 'NAME.xcodeproj'.freeze
 ENV['SCHEME'] = ''
 ENV['APP_NAME'] = ''
+ENV['APP_ENVIRONMENT'] = '' # Define the environment
 ENV['TARGET'] = '' # For launch the lane send_metrics
 
 # Firebase
