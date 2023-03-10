@@ -72,6 +72,7 @@ ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
 ENV['JIRA_REF'] = '/(\b((JIRA)-)|#)[0-9]+\b/i'.freeze
 ENV['XCOV_MIN_PERCENTAGE'] = '80.00'.freeze
 ENV['XCOV_INCLUDE_TARGETS'] = ''.freeze
+ENV['XCOV_IGNORE_FILE_PATH'] = '.xcovignore'.freeze
 
 # Optional
 ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze

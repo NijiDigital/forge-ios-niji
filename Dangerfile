@@ -231,7 +231,8 @@ xcov.report(
   workspace: ENV['XCWORKSPACE'],
   scheme: ENV['SCHEME'],
   minimum_coverage_percentage: ENV['XCOV_MIN_PERCENTAGE'].to_f,
-  include_targets: ENV['XCOV_INCLUDE_TARGETS'],
+  ignore_file_path: ENV['XCOV_IGNORE_FILE_PATH'],
+  only_project_targets: true,
   xccov_file_direct_path: "#{ENV['REPORTS_PATH']}/#{ENV['SCHEME']}.xcresult"
 )
 
