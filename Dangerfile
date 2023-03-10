@@ -230,8 +230,8 @@ swiftlint.max_num_violations = 20
 xcov.report(
   workspace: ENV['XCWORKSPACE'],
   scheme: ENV['SCHEME'],
-  minimum_coverage_percentage: ENV['MIN_XCOV_PERCENTAGE'].to_f,
-  include_targets: "#{ENV['APP_NAME']}.app",
+  minimum_coverage_percentage: ENV['XCOV_MIN_PERCENTAGE'].to_f,
+  include_targets: ENV['XCOV_INCLUDE_TARGETS'],
   xccov_file_direct_path: "#{ENV['REPORTS_PATH']}/#{ENV['SCHEME']}.xcresult"
 )
 
