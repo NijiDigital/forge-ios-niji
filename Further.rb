@@ -4,8 +4,8 @@
 
 desc "Checks the expiration date for all certificates and provisioning profiles"
 lane :check_certificates_and_profiles do
-  Spaceship::Portal.login(ENV.fetch('APPLE_LOGIN', nil)
-  Spaceship::Portal.select_team(team_id: (ENV.fetch('TEAM_ID', nil)
+  Spaceship::Portal.login(ENV.fetch('APPLE_LOGIN', nil))
+  Spaceship::Portal.select_team(team_id: ENV.fetch('TEAM_ID', nil))
 
   # Fetch all available certificates (includes signing and push profiles)
   certificates = Spaceship::Portal.certificate.all
