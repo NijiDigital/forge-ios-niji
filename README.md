@@ -58,6 +58,7 @@ ENV['SCHEME'] = ''
 ENV['APP_NAME'] = ''
 ENV['APP_ENVIRONMENT'] = '' # Define the environment
 ENV['TARGET'] = '' # For launch the lane send_metrics
+ENV['TARGET_TEST'] = ''
 
 # Firebase
 ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = 'GoogleService-Info.plist'.freeze # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
