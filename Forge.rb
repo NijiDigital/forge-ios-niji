@@ -96,7 +96,7 @@ lane :prepare do |options|
 
   xcodegen(spec: ENV['XCODEGEN_PATH']) unless ENV['XCODEGEN_PATH'].nil?
 
-  cocoapods
+  cocoapods unless !File.exists?('Podfile')
   after_prepare(options)
 end
 
