@@ -151,7 +151,7 @@ lane :archive do |options|
 
   if options[:icloud] == true
     export_options = {
-      iCloudContainerEnvironment: 'Production'
+      iCloudContainerEnvironment: ENV['ICLOUD_CONTAINER_ENVIRONMENT']
     }
   end
 
