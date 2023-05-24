@@ -230,11 +230,9 @@ desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
 
-  changelog = ENV['CHANGELOG'].nil? ? ENV['CHANGELOG'] : ''
-
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
-    release_notes: changelog,
+    release_notes: File.read(ENV.fetch('CHANGELOG_PATH', nil)),
     firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil),
     groups: ENV.fetch('FIREBASE_TEST_GROUP', nil)
   )

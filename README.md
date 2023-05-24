@@ -84,7 +84,7 @@ ENV['PODFILE_PATH'] = 'Podfile'.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
-ENV['CHANGELOG'] = File.read('CHANGELOG.md')
+ENV['CHANGELOG_PATH'] = 'CHANGELOG.md'.freeze
 ```
 
 ## Options Fastlane
