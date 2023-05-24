@@ -234,7 +234,8 @@ lane :ota do |options|
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
     release_notes: changelog,
-    firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil)
+    firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil),
+    groups: ENV.fetch('FIREBASE_TEST_GROUP', nil)
   )
 end
 
