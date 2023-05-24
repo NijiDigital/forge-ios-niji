@@ -80,6 +80,7 @@ ENV['XCOV_IGNORE_FILE_PATH'] = '.xcovignore'.freeze
 
 # Optional
 ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
+ENV['PODFILE_PATH'] = 'Podfile'.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
