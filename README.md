@@ -63,6 +63,10 @@ ENV['TARGET_TEST'] = ''
 # Firebase
 ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = 'GoogleService-Info.plist'.freeze # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
 ENV['FIREBASE_CLI_TOKEN'] = '' # Move this variable in file ".env" at the root of the fastlane folder because this variable is sensible 
+ENV['FIREBASE_TEST_GROUP'] = '' # ID for group tester
+
+# iCloud
+ENV['ICLOUD_CONTAINER_ENVIRONMENT'] = 'Production' # 'Development'
 
 # App Store Connect
 ENV['KEY_ID'] = ''.freeze
@@ -76,6 +80,7 @@ ENV['XCOV_IGNORE_FILE_PATH'] = '.xcovignore'.freeze
 
 # Optional
 ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
+ENV['PODFILE_PATH'] = 'Podfile'.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze

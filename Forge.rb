@@ -96,7 +96,8 @@ lane :prepare do |options|
 
   xcodegen(spec: ENV['XCODEGEN_PATH']) unless ENV['XCODEGEN_PATH'].nil?
 
-  cocoapods unless !File.exists?('Podfile')
+  cocoapods unless ENV['PODFILE_PATH'].nil?
+  
   after_prepare(options)
 end
 
@@ -149,6 +150,12 @@ lane :archive do |options|
 
   badge_icon
 
+  if options[:icloud] == true
+    export_options = {
+      iCloudContainerEnvironment: ENV['ICLOUD_CONTAINER_ENVIRONMENT']
+    }
+  end
+
   gym(
     workspace: ENV.fetch('XCWORKSPACE', nil),
     scheme: ENV.fetch('SCHEME', nil),
@@ -159,7 +166,8 @@ lane :archive do |options|
     silent: true,
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
-    output_directory: ENV.fetch('BUILD_PATH', nil)
+    output_directory: ENV.fetch('BUILD_PATH', nil),
+    export_options: export_options
   )
 end
 
@@ -180,11 +188,11 @@ desc 'Extract the version & build number from the project into environment varia
 private_lane :get_versions_from_project do
   UI.message 'Extracting Version & Build number…'
   current_version = get_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION'
   )
   current_build_number = get_xcconfig_value(
-    path: APP_VERSION_PATH,
+    path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_BUILD_NUMBER'
   )
   ENV['VERSION_NUMBER'] = current_version
@@ -227,7 +235,8 @@ lane :ota do |options|
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
     release_notes: changelog,
-    firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil)
+    firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil),
+    groups: ENV.fetch('FIREBASE_TEST_GROUP', nil)
   )
 end
 
