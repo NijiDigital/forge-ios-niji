@@ -3,7 +3,7 @@
 # format options
 
 --commas inline
---indent 4
+--indent 2
 --ranges no-space
 --wrapparameters after-first
 --wrapcollections before-first
