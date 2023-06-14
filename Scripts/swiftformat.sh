@@ -13,7 +13,6 @@ if [ "${CONFIGURATION}" == "Debug" ]; then
         echo "Switching to local .swiftformat"
         CONFIG_FILE="$SRCROOT/.swiftformat"
     fi
-    echo "CONFIG : $CONFIG_FILE"
     swiftformat . --config $CONFIG_FILE --exclude "$SRCROOT/fastlane/" --exclude "$SRCROOT/Pods/" --exclude "**/Generated/" --exclude "**/Templates/" --exclude "Build/" --exclude "Reports/" --exclude ".build/" --exclude "DerivedData/"
   else
     echo "warning: SwiftFormat not installed, download from https://github.com/nicklockwood/SwiftFormat"
