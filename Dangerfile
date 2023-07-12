@@ -227,7 +227,7 @@ swiftlint.max_num_violations = 20
 # Run Xcov #
 ############
 
-if ENV['XCOV_MIN_PERCENTAGE'].present?
+unless ENV['XCOV_MIN_PERCENTAGE'].nil?
   if ENV['PODFILE_PATH'].nil?
     xcov.report(
       project: ENV['XCPROJECT'],
@@ -260,9 +260,9 @@ junit.report
 # Run periphery  #
 ##################
 
-if ENV['PERIPHERY_BINARY_PATH'].present?
+unless ENV['PERIPHERY_BINARY_PATH'].nil?
   periphery.binary_path = ENV['PERIPHERY_BINARY_PATH']
-
+  
   if ENV['PODFILE_PATH'].nil?
     periphery.scan(
       project: ENV['XCPROJECT'],
