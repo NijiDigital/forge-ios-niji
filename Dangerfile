@@ -67,13 +67,13 @@ end
 # Notifies when the Podfile has been updated #
 ##############################################
 
-message("The Podfile was updated 🫘") unless git.modified_files.include?('Podfile')
+message("The Podfile was updated 🫘") if git.modified_files.include?('Podfile')
 
 ##############################################
 # Notifies when the Gemfile has been updated #
 ##############################################
 
-message('The Gemfile was updated 💎') unless git.modified_files.include?('Gemfile')
+message('The Gemfile was updated 💎') if git.modified_files.include?('Gemfile')
 
 ######################
 # Merge request size #
@@ -227,14 +227,27 @@ swiftlint.max_num_violations = 20
 # Run Xcov #
 ############
 
-xcov.report(
-  workspace: ENV['XCWORKSPACE'],
-  scheme: ENV['SCHEME'],
-  minimum_coverage_percentage: ENV['XCOV_MIN_PERCENTAGE'].to_f,
-  ignore_file_path: ENV['XCOV_IGNORE_FILE_PATH'],
-  only_project_targets: true,
-  xccov_file_direct_path: "#{ENV['REPORTS_PATH']}/#{ENV['SCHEME']}.xcresult"
-)
+unless ENV['XCOV_MIN_PERCENTAGE'].nil?
+  if ENV['PODFILE_PATH'].nil?
+    xcov.report(
+      project: ENV['XCPROJECT'],
+      scheme: ENV['SCHEME'],
+      minimum_coverage_percentage: ENV['XCOV_MIN_PERCENTAGE'].to_f,
+      ignore_file_path: ENV['XCOV_IGNORE_FILE_PATH'],
+      only_project_targets: true,
+      xccov_file_direct_path: "#{ENV['REPORTS_PATH']}/#{ENV['SCHEME']}.xcresult"
+    )
+  else
+    xcov.report(
+      workspace: ENV['XCWORKSPACE'],
+      scheme: ENV['SCHEME'],
+      minimum_coverage_percentage: ENV['XCOV_MIN_PERCENTAGE'].to_f,
+      ignore_file_path: ENV['XCOV_IGNORE_FILE_PATH'],
+      only_project_targets: true,
+      xccov_file_direct_path: "#{ENV['REPORTS_PATH']}/#{ENV['SCHEME']}.xcresult"
+    )
+  end
+end
 
 ###########################
 # Display report UnitTest #
@@ -247,11 +260,24 @@ junit.report
 # Run periphery  #
 ##################
 
-periphery.binary_path = '/usr/local/bin/periphery'
-periphery.scan(
-  workspace: ENV['XCWORKSPACE'],
-  schemes: ENV['SCHEME'],
-  targets: ENV['SCHEME'],
-  skip_build: true,
-  index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
-)
+unless ENV['PERIPHERY_BINARY_PATH'].nil?
+  periphery.binary_path = ENV['PERIPHERY_BINARY_PATH']
+  
+  if ENV['PODFILE_PATH'].nil?
+    periphery.scan(
+      project: ENV['XCPROJECT'],
+      schemes: ENV['SCHEME'],
+      targets: ENV['SCHEME'],
+      skip_build: true,
+      index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
+    )
+  else
+    periphery.scan(
+      workspace: ENV['XCWORKSPACE'],
+      schemes: ENV['SCHEME'],
+      targets: ENV['SCHEME'],
+      skip_build: true,
+      index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
+    )
+  end  
+end

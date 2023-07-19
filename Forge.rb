@@ -44,13 +44,13 @@ end
 desc 'Install developer tools'
 lane :install_developer_tools do
   # Install rbenv for initializing ruby in the project
-  brew(command: 'install rbenv')
+  brew(command: 'install rbenv') unless is_ci
 
   # Install ruby-build, an rbenv plugin to easily install any version of ruby
-  brew(command: 'install ruby-build')
+  brew(command: 'install ruby-build') unless is_ci
 
   # Install pyenv for python initialization in the project
-  brew(command: 'install pyenv')
+  brew(command: 'install pyenv') unless is_ci
 
   # Install swiftlint
   brew(command: 'install swiftlint')
@@ -84,6 +84,7 @@ end
 desc 'Generate project and install pods'
 lane :prepare do |options|
   install_developer_tools
+
   before_prepare(options)
 
   switch_to_env(options) if options[:env]
@@ -97,7 +98,7 @@ lane :prepare do |options|
   xcodegen(spec: ENV['XCODEGEN_PATH']) unless ENV['XCODEGEN_PATH'].nil?
 
   cocoapods unless ENV['PODFILE_PATH'].nil?
-  
+
   after_prepare(options)
 end
 
@@ -114,6 +115,38 @@ desc 'Runs all the tests'
 lane :test do |options|
   prepare(options)
 
+  if ENV['PODFILE_PATH'].nil?
+    scan_with_project
+  else
+    scan_with_workspace
+  end
+
+  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
+
+  after_test(options)
+end
+
+lane :after_test do |options|
+  # override method
+end
+
+desc 'Scan with project for SPM project'
+private_lane :scan_with_project do
+  scan(
+    project: ENV.fetch('XCPROJECT', nil),
+    scheme: ENV.fetch('SCHEME', nil),
+    clean: false,
+    output_types: 'junit',
+    result_bundle: true,
+    code_coverage: true,
+    derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
+    output_directory: ENV.fetch('REPORTS_PATH', nil),
+    fail_build: false
+  )
+end
+
+desc 'Scan with workspace for CocoaPods project'
+private_lane :scan_with_workspace do
   scan(
     workspace: ENV.fetch('XCWORKSPACE', nil),
     scheme: ENV.fetch('SCHEME', nil),
@@ -125,14 +158,6 @@ lane :test do |options|
     output_directory: ENV.fetch('REPORTS_PATH', nil),
     fail_build: false
   )
-
-  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
-
-  after_test(options)
-end
-
-lane :after_test do |options|
-  # override method
 end
 
 ###########################
@@ -156,18 +181,50 @@ lane :archive do |options|
     }
   end
 
+  if ENV['PODFILE_PATH'].nil?
+    gym_with_project(
+      export_method: export_method,
+      export_options: export_options
+    )
+  else
+    gym_with_workspace(
+      export_method: export_method,
+      export_options: export_options
+    )
+  end
+end
+
+desc 'Gym with project for SPM project'
+private_lane :gym_with_project do |options|
   gym(
-    workspace: ENV.fetch('XCWORKSPACE', nil),
+    project: ENV.fetch('XCPROJECT', nil),
     scheme: ENV.fetch('SCHEME', nil),
     configuration: ENV.fetch('CONFIGURATION', nil),
     output_name: "#{ENV['APP_NAME']}.ipa",
-    export_method: export_method,
+    export_method: options[:export_method],
     sdk: 'iphoneos',
     silent: true,
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: export_options
+    export_options: options[:export_option]
+  )
+end
+
+desc 'Gym with workspace for CocoaPods project'
+private_lane :gym_with_workspace do |options|
+  gym(
+    workspace: ENV.fetch('XCWORKSPACE', nil),
+    scheme: ENV.fetch('SCHEME', nil),
+    configuration: ENV.fetch('CONFIGURATION', nil),
+    output_name: "#{ENV['APP_NAME']}.ipa",
+    export_method: options[:export_method],
+    sdk: 'iphoneos',
+    silent: true,
+    clean: false,
+    build_path: ENV.fetch('BUILD_PATH', nil),
+    output_directory: ENV.fetch('BUILD_PATH', nil),
+    export_options: options[:export_options]
   )
 end
 
@@ -230,10 +287,12 @@ desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
 
+  changelog = File.read(ENV['CHANGELOG'])
+
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
-    release_notes: File.read(ENV.fetch('CHANGELOG_PATH', nil)),
-    firebase_cli_token: ENV.fetch('FIREBASE_CLI_TOKEN', nil),
+    release_notes: changelog,
+    service_credentials_file: ENV.fetch('GOOGLE_APPLICATION_CREDENTIALS', nil),
     groups: ENV.fetch('FIREBASE_TEST_GROUP', nil)
   )
 end
@@ -247,7 +306,7 @@ lane :beta do |options|
   app_store_connect_api_key(
     key_id: ENV.fetch('KEY_ID', nil),
     issuer_id: ENV.fetch('ISSUER_ID', nil),
-    key_filepath: "#{ENV['GENERIC_FILE_STORAGE']}/AuthKey_#{ENV['KEY_ID']}.p8"
+    key_filepath: ENV.fetch('KEY_FILEPATH', nil)
   )
 
   pilot(

@@ -62,7 +62,7 @@ ENV['TARGET_TEST'] = ''
 
 # Firebase
 ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = 'GoogleService-Info.plist'.freeze # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
-ENV['FIREBASE_CLI_TOKEN'] = '' # Move this variable in file ".env" at the root of the fastlane folder because this variable is sensible 
+ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '' # https://firebase.google.com/docs/app-distribution/ios/distribute-fastlane?hl=fr#service-acc-fastlane
 ENV['FIREBASE_TEST_GROUP'] = '' # ID for group tester
 
 # iCloud
@@ -71,15 +71,16 @@ ENV['ICLOUD_CONTAINER_ENVIRONMENT'] = 'Production' # 'Development'
 # App Store Connect
 ENV['KEY_ID'] = ''.freeze
 ENV['ISSUER_ID'] = ''.freeze
+ENV['KEY_FILEPATH'] = ''.freeze
 
 # Danger
 ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
 ENV['JIRA_REF'] = '/(\b((JIRA)-)|#)[0-9]+\b/i'.freeze
 ENV['XCOV_MIN_PERCENTAGE'] = '80.00'.freeze
 ENV['XCOV_IGNORE_FILE_PATH'] = '.xcovignore'.freeze
+ENV['PERIPHERY_BINARY_PATH'] = '/usr/local/bin/periphery'.freeze
 
 # Optional
-ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
 ENV['PODFILE_PATH'] = 'Podfile'.freeze
 ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
