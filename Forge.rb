@@ -430,16 +430,16 @@ lane :increment_major do
   )
 end
 
-###########################
-# Dependancy check        #
-###########################
+####################
+# Dependency check #
+####################
 
 desc 'OWASP dependency-check iOS analyzers'
-lane :dependancy_check do
+lane :dependency_check do
   dependency_check_ios_analyzer(
     project_name: ENV['APP_NAME'],
     output_directory: ENV['REPORTS_PATH'],
     output_types: 'junit',
-    suppression: ENV['DEPENDANCY_CHECK_SUPPRESSION_FILE_PATH']
+    suppression: ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH']
   )
 end
