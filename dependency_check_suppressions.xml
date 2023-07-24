@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+   <suppress>
+      <notes><![CDATA[
+      CVE-2021-28790 (faux positif)
+      ]]></notes>
+      <cve>CVE-2021-28790</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+      CVE-2021-28791 (faux positif)
+      ]]></notes>
+      <cve>CVE-2021-28791</cve>
+   </suppress>
+</suppressions>
