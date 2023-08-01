@@ -13,6 +13,7 @@ before_all do
   fastlane_require 'fastlane-plugin-firebase_app_distribution'
   fastlane_require 'fastlane-plugin-xcconfig'
   fastlane_require 'fastlane-plugin-xcodegen'
+  fastlane_require 'fastlane-plugin-dependency_check_ios_analyzer'
 end
 
 after_all do |lane|
@@ -426,5 +427,21 @@ lane :increment_major do
     path: ENV.fetch('APP_VERSION_PATH', nil),
     name: 'APP_VERSION',
     value: new_version.to_s
+  )
+end
+
+####################
+# Dependency check #
+####################
+
+desc 'OWASP dependency-check iOS analyzers'
+lane :dependency_check do
+  dependency_check_ios_analyzer(
+    skip_spm_analysis: ENV['PODFILE_PATH'].nil? ? false : true,
+    skip_pods_analysis: ENV['PODFILE_PATH'].nil? ? true : false,
+    project_name: ENV['APP_NAME'],
+    output_directory: ENV['REPORTS_PATH'],
+    output_types: 'junit',
+    suppression: ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH']
   )
 end

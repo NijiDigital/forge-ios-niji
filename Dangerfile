@@ -281,3 +281,15 @@ unless ENV['PERIPHERY_BINARY_PATH'].nil?
     )
   end  
 end
+
+####################
+# Dependency check #
+####################
+
+unless ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH'].nil?
+  dependency_report_file = "#{ENV['REPORTS_PATH']}/CocoaPods/report/dependency-check-junit.xml"
+  if File.exist?(dependency_report_file)
+    junit.parse(dependency_report_file)
+    junit.report
+  end
+end

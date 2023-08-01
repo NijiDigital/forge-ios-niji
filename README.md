@@ -86,6 +86,7 @@ ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
 ENV['POESIE_PATH'] = ''.freeze
 ENV['SWAGGEN_PATH'] = ''.freeze
 ENV['CHANGELOG_PATH'] = 'CHANGELOG.md'.freeze
+ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH'] = ''.freeze
 ```
 
 ## Options Fastlane
