@@ -437,6 +437,8 @@ end
 desc 'OWASP dependency-check iOS analyzers'
 lane :dependency_check do
   dependency_check_ios_analyzer(
+    skip_spm_analysis: ENV['PODFILE_PATH'].nil? ? false : true,
+    skip_pods_analysis: ENV['PODFILE_PATH'].nil? ? true : false,
     project_name: ENV['APP_NAME'],
     output_directory: ENV['REPORTS_PATH'],
     output_types: 'junit',
