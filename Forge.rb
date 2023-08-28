@@ -284,11 +284,18 @@ end
 # Deploy                  #
 ###########################
 
+desc 'Before OTA upload'
+lane :before_ota_upload do |options|
+  # override method
+end
+
 desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
 
   changelog = File.read(ENV['CHANGELOG_PATH'])
+
+  before_ota_upload(options)
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
@@ -296,6 +303,11 @@ lane :ota do |options|
     service_credentials_file: ENV.fetch('GOOGLE_APPLICATION_CREDENTIALS', nil),
     groups: ENV.fetch('FIREBASE_TEST_GROUP', nil)
   )
+end
+
+desc 'Before beta upload'
+lane :before_beta_upload do |options|
+  # override method
 end
 
 desc 'Submit a new Beta Build to Apple TestFlight'
@@ -309,6 +321,8 @@ lane :beta do |options|
     issuer_id: ENV.fetch('ISSUER_ID', nil),
     key_filepath: ENV.fetch('KEY_FILEPATH', nil)
   )
+
+  before_beta_upload(options)
 
   pilot(
     skip_submission: true,
