@@ -208,7 +208,7 @@ private_lane :gym_with_project do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_option]
+    export_options: options[:export_options]
   )
 end
 
