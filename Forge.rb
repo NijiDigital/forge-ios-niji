@@ -292,10 +292,10 @@ end
 desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
+  
+  before_ota_upload(options)
 
   changelog = File.read(ENV['CHANGELOG_PATH'])
-
-  before_ota_upload(options)
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
@@ -316,13 +316,13 @@ lane :beta do |options|
 
   archive(options)
 
+  before_beta_upload(options)
+
   app_store_connect_api_key(
     key_id: ENV.fetch('KEY_ID', nil),
     issuer_id: ENV.fetch('ISSUER_ID', nil),
     key_filepath: ENV.fetch('KEY_FILEPATH', nil)
   )
-
-  before_beta_upload(options)
 
   pilot(
     skip_submission: true,
