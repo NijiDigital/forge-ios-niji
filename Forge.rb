@@ -456,7 +456,7 @@ lane :dependency_check do
     skip_pods_analysis: is_using_spm,
     project_name: ENV['APP_NAME'],
     output_directory: ENV['REPORTS_PATH'],
-    output_types: 'junit',
+    output_types: 'all',
     suppression: ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH']
   )
 end
