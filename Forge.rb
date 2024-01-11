@@ -4,9 +4,6 @@
 
 before_all do
   UI.user_error! 'You must run fastlane using `bundle exec fastlane`' if ENV['BUNDLE_GEMFILE'].nil?
-
-  update_fastlane
-
   fastlane_require 'fastlane-plugin-badge'
   fastlane_require 'fastlane-plugin-brew'
   fastlane_require 'fastlane-plugin-changelog'
