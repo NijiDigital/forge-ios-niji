@@ -7,10 +7,10 @@ before_all do
   fastlane_require 'fastlane-plugin-badge'
   fastlane_require 'fastlane-plugin-brew'
   fastlane_require 'fastlane-plugin-changelog'
+  fastlane_require 'fastlane-plugin-dependency_check_ios_analyzer'
   fastlane_require 'fastlane-plugin-firebase_app_distribution'
   fastlane_require 'fastlane-plugin-xcconfig'
   fastlane_require 'fastlane-plugin-xcodegen'
-  fastlane_require 'fastlane-plugin-dependency_check_ios_analyzer'
 end
 
 after_all do |lane|
@@ -375,7 +375,11 @@ end
 desc 'Generate assets with SwiftGen'
 lane :swiftgen do
   Dir.chdir("..") do
-    brew(command: 'install swiftgen')
+    # SwiftGen - GitHub issues : https://github.com/SwiftGen/SwiftGen/issues/1104
+    if `which swiftgen`.empty?
+      sh('curl -Lo /tmp/swiftgen.rb https://raw.githubusercontent.com/iMichka/homebrew-core/17ae00b4bf1640cc544eae5f6eec03775c09420b/Formula/swiftgen.rb')
+      sh('brew install /tmp/swiftgen.rb && rm /tmp/swiftgen.rb')
+    end
     sh("swiftgen config run --config #{ENV['SWIFTGEN_PATH']}")
   end
 end
