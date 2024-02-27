@@ -378,6 +378,7 @@ lane :swiftgen do
   Dir.chdir("..") do
     brew(command: 'install mint')
     sh('mint install SwiftGen/SwiftGen')
+    sh('ln -s ~/.mint/packages/github.com_SwiftGen_SwiftGen/build/6.6.2/SwiftGen_SwiftGenCLI.bundle ~/.mint/bin/SwiftGen_SwiftGenCLI.bundle')
     sh("swiftgen config run --config #{ENV['SWIFTGEN_PATH']}")
   end
 end
