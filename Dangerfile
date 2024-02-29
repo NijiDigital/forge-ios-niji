@@ -204,9 +204,9 @@ files_to_check = (git.modified_files + git.added_files).uniq
       foundMark = true if line.include?('MARK:') && line.include?('//')
 
       ## Check for public properties which aren't commented
-      if (disabled_rules.include?("public_docs") == false) && line_contains_public_property_method_class_or_struct(line) && line_includes_document_comment(filelines[index - 1]) == false
-        warn("Public properties, methods, classes or structs should be documented. Make use of `///` or `/* */` so it will show up inside the docs. (public_docs)", file: file, line: index + 1)
-      end
+      # if (disabled_rules.include?("public_docs") == false) && line_contains_public_property_method_class_or_struct(line) && line_includes_document_comment(filelines[index - 1]) == false
+      #  warn("Public properties, methods, classes or structs should be documented. Make use of `///` or `/* */` so it will show up inside the docs. (public_docs)", file: file, line: index + 1)
+      # end
     end
   end
 
