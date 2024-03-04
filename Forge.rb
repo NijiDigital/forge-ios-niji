@@ -89,8 +89,6 @@ lane :prepare do |options|
 
   config(options) if options[:config]
 
-  swaggen(options) unless ENV['SWAGGEN_PATH'].nil?
-
   swiftgen unless ENV['SWIFTGEN_PATH'].nil?
 
   xcodegen(spec: ENV['XCODEGEN_PATH']) unless ENV['XCODEGEN_PATH'].nil?
@@ -358,28 +356,13 @@ lane :poesie do
 end
 
 ###########################
-# Swagger                 #
-###########################
-
-desc 'Generate network stack with SwagGen'
-lane :swaggen do
-  brew(command: 'install mint')
-  sh('mint install yonaskolb/SwagGen')
-  sh("bash #{ENV['SWAGGEN_PATH']}")
-end
-
-###########################
 # SwiftGen                #
 ###########################
 
 desc 'Generate assets with SwiftGen'
 lane :swiftgen do
   Dir.chdir("..") do
-    # SwiftGen - GitHub issues : https://github.com/SwiftGen/SwiftGen/issues/1104
-    if `which swiftgen`.empty?
-      sh('curl -Lo /tmp/swiftgen.rb https://raw.githubusercontent.com/iMichka/homebrew-core/17ae00b4bf1640cc544eae5f6eec03775c09420b/Formula/swiftgen.rb')
-      sh('brew install /tmp/swiftgen.rb && rm /tmp/swiftgen.rb')
-    end
+    brew(command: 'install swiftgen')
     sh("swiftgen config run --config #{ENV['SWIFTGEN_PATH']}")
   end
 end
