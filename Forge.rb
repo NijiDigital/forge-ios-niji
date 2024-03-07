@@ -164,6 +164,7 @@ desc 'Build and archive the app'
 lane :archive do |options|
   distribution_method = options[:enterprise] == true ? 'enterprise' : 'ad-hoc'
   export_method = options[:appstore] == true ? 'app-store' : distribution_method
+  symbols_inclusion = options[:appstore] == true ? false : true
 
   prepare(options)
 
@@ -203,7 +204,8 @@ private_lane :gym_with_project do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_options]
+    export_options: options[:export_options],
+    include_symbols: symbols_inclusion
   )
 end
 
@@ -220,7 +222,8 @@ private_lane :gym_with_workspace do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_options]
+    export_options: options[:export_options],
+    include_symbols: symbols_inclusion
   )
 end
 
