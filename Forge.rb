@@ -181,12 +181,14 @@ lane :archive do |options|
   if ENV['PODFILE_PATH'].nil?
     gym_with_project(
       export_method: export_method,
-      export_options: export_options
+      export_options: export_options,
+      symbols_inclusion: symbols_inclusion
     )
   else
     gym_with_workspace(
       export_method: export_method,
-      export_options: export_options
+      export_options: export_options,
+      symbols_inclusion: symbols_inclusion
     )
   end
 end
@@ -205,7 +207,7 @@ private_lane :gym_with_project do |options|
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
     export_options: options[:export_options],
-    include_symbols: symbols_inclusion
+    include_symbols: options[:symbols_inclusion]
   )
 end
 
@@ -223,7 +225,7 @@ private_lane :gym_with_workspace do |options|
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
     export_options: options[:export_options],
-    include_symbols: symbols_inclusion
+    include_symbols: options[:symbols_inclusion]
   )
 end
 
