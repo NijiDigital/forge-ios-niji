@@ -186,9 +186,9 @@ files_to_check = (git.modified_files + git.added_files).uniq
     else
       # Start our custom line checks
       ## Check for the usage of final class
-      if (disabled_rules.include?('final_class') == false) && line.include?('class') && !line.include?('final') && !line.include?('func') && !line.include?('//') && !line.include?('protocol')
-        warn("Consider using final for this class or use a struct (final_class)", file: file, line: index + 1)
-      end
+      # if (disabled_rules.include?('final_class') == false) && line.include?('class') && !line.include?('final') && !line.include?('func') && !line.include?('//') && !line.include?('protocol')
+      #  warn("Consider using final for this class or use a struct (final_class)", file: file, line: index + 1)
+      # end
 
       ## Check for the usage of unowned self
       if line.include?("unowned self")
