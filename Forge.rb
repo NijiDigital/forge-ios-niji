@@ -137,7 +137,7 @@ private_lane :scan_with_project do
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
     output_directory: ENV.fetch('REPORTS_PATH', nil),
-    fail_build: false
+    fail_build: ENV.fetch('FAIL_BUILD', 'true') == 'true'
   )
 end
 
@@ -152,7 +152,7 @@ private_lane :scan_with_workspace do
     code_coverage: true,
     derived_data_path: ENV.fetch('DERIVED_DATA_PATH', nil),
     output_directory: ENV.fetch('REPORTS_PATH', nil),
-    fail_build: false
+    fail_build: ENV.fetch('FAIL_BUILD', 'true') == 'true'
   )
 end
 
