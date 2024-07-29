@@ -117,7 +117,7 @@ lane :test do |options|
     scan_with_workspace
   end
 
-  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
+  danger(dangerfile: ENV['DANGERFILE_PATH'], verbose: true) if is_ci && !ENV['DANGERFILE_PATH'].nil?
 
   after_test(options)
 end
