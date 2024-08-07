@@ -2,14 +2,26 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
    <suppress>
       <notes><![CDATA[
-      CVE-2021-28790 (faux positif)
+      CVE-2021-28790 (faux positif - swiftlint pour Visual Studio Code)
       ]]></notes>
       <cve>CVE-2021-28790</cve>
    </suppress>
    <suppress>
       <notes><![CDATA[
-      CVE-2021-28791 (faux positif)
+      CVE-2021-28791 (faux positif - swiftformat pour Visual Studio Code)
       ]]></notes>
       <cve>CVE-2021-28791</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+      CVE-2007-1652 (faux positif - MyOpenID)
+      ]]></notes>
+      <cve>CVE-2007-1652</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
+      CVE-2008-0660 (faux positif - ActiveX pour Facebook)
+      ]]></notes>
+      <cve>CVE-2008-0660</cve>
    </suppress>
 </suppressions>
