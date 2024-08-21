@@ -14,6 +14,12 @@
    </suppress>
    <suppress>
       <notes><![CDATA[
+      CVE-2007-1651 (faux positif - MyOpenID)
+      ]]></notes>
+      <cve>CVE-2007-1651</cve>
+   </suppress>
+   <suppress>
+      <notes><![CDATA[
       CVE-2007-1652 (faux positif - MyOpenID)
       ]]></notes>
       <cve>CVE-2007-1652</cve>
