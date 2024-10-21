@@ -318,6 +318,8 @@ lane :beta do |options|
 
   before_beta_upload(options)
 
+  changelog = File.read(ENV['CHANGELOG_PATH'])
+
   app_store_connect_api_key(
     key_id: ENV.fetch('KEY_ID', nil),
     issuer_id: ENV.fetch('ISSUER_ID', nil),
@@ -325,6 +327,7 @@ lane :beta do |options|
   )
 
   pilot(
+    localized_build_info: changelog,
     skip_submission: true,
     skip_waiting_for_build_processing: true
   )
