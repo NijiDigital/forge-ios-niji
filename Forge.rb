@@ -336,7 +336,6 @@ end
 
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
-  sh('pip install --upgrade mobsfscan')
   brew(command: 'install sonar-scanner')
 end
 
