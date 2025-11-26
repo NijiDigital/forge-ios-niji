@@ -166,9 +166,9 @@ lane :archive do |options|
   export_method = options[:appstore] == true ? 'app-store' : distribution_method
   symbols_inclusion = options[:appstore] == true ? false : true
 
-  prepare(options)
-
   set_build_number unless ENV['PLIST_PATH'].nil?
+
+  prepare(options)
 
   badge_icon
 
@@ -229,14 +229,14 @@ private_lane :gym_with_workspace do |options|
   )
 end
 
-desc 'Extract the build number from bitrise into environment variables and set in Info.plist'
+desc 'Extract the build number from bitrise into environment variables and set in AppVersion.xcconfig'
 private_lane :set_build_number do
   UI.message 'Extracting Build number'
   if ENV['BITRISE_BUILD_NUMBER']
     UI.message "==> bitrise build number : #{ENV['BITRISE_BUILD_NUMBER']}"
-    set_info_plist_value(
-      path: ENV.fetch('PLIST_PATH', nil),
-      key: 'CFBundleVersion',
+    update_xcconfig_value(
+      path: ENV.fetch('APP_VERSION_PATH', nil),
+      name: 'APP_BUILD_NUMBER',
       value: ENV['BITRISE_BUILD_NUMBER']
     )
   end
