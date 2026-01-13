@@ -13,28 +13,6 @@ before_all do
   fastlane_require 'fastlane-plugin-xcodegen'
 end
 
-after_all do |lane|
-  next if is_ci
-
-  notification(
-    title: "✅ fastlane #{lane}",
-    message: "Configuration: #{ENV['CONFIGURATION'] || '(none)'}",
-    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
-    sound: 'default'
-  )
-end
-
-error do |lane, exception|
-  next if is_ci
-
-  notification(
-    title: "🛑 fastlane #{lane}",
-    message: "Error: #{exception}",
-    app_icon: 'https://s3-eu-west-1.amazonaws.com/fastlane.tools/fastlane.png',
-    sound: 'hero'
-  )
-end
-
 ###########################
 # Requirement             #
 ###########################
@@ -166,7 +144,7 @@ lane :archive do |options|
   export_method = options[:appstore] == true ? 'app-store' : distribution_method
   symbols_inclusion = options[:appstore] == true ? false : true
 
-  set_build_number unless ENV['PLIST_PATH'].nil?
+  set_build_number unless ENV['APP_VERSION_PATH'].nil?
 
   prepare(options)
 
