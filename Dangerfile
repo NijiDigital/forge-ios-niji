@@ -262,7 +262,7 @@ junit.report
 
 unless ENV['PERIPHERY_BINARY_PATH'].nil?
   periphery.binary_path = ENV['PERIPHERY_BINARY_PATH']
-  
+
   if ENV['PODFILE_PATH'].nil?
     periphery.scan(
       project: ENV['XCPROJECT'],
@@ -279,7 +279,7 @@ unless ENV['PERIPHERY_BINARY_PATH'].nil?
       skip_build: true,
       index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
     )
-  end  
+  end
 end
 
 ####################

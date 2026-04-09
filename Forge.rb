@@ -270,7 +270,7 @@ end
 desc 'Build and distribute OTA to Firebase App Distribution'
 lane :ota do |options|
   archive(options)
-  
+
   before_ota_upload(options)
 
   changelog = File.read(ENV['CHANGELOG_PATH'])
@@ -410,19 +410,14 @@ lane :increment_major do
   )
 end
 
-####################
-# Dependency check #
-####################
+###########################
+# Dependency Track        #
+###########################
 
-desc 'OWASP dependency-check iOS analyzers'
-lane :dependency_check do
-  is_using_spm = ENV['PODFILE_PATH'].nil?
-  dependency_check_ios_analyzer(
-    skip_spm_analysis: !is_using_spm,
-    skip_pods_analysis: is_using_spm,
-    project_name: ENV['APP_NAME'],
-    output_directory: ENV['REPORTS_PATH'],
-    output_types: 'all',
-    suppression: ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH']
-  )
+desc 'Send SBOM to Dependency Track'
+lane :dependency_track do
+  Dir.chdir("..") do
+    brew(command: 'install cdxgen')
+    sh("cdxgen --server-url #{ENV['DEPENDENCY_TRACK_URL']} --project-id #{ENV['DEPENDENCY_TRACK_PROJECT_ID']} --api-key #{ENV['DEPENDENCY_TRACK_API_KEY']}")
+  end
 end
