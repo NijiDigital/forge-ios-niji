@@ -22,6 +22,7 @@ end
 
 desc 'Create a changelog entry with towncrier to be used in the next changelog generation'
 lane :create_logentry do |options|
+  ensure_towncrier_installed
   category_choices = CHANGELOG_CATEGORIES
 
   category = options[:category]
@@ -112,6 +113,7 @@ end
 
 desc 'Create a draft for an upcoming changelog'
 private_lane :create_draft_for_changelog do |values|
+  ensure_towncrier_installed
   version = values[:version]
   Dir.chdir('..') do
     sh "towncrier build --draft --version=#{version} > towncrier/changelog_draft;"
@@ -120,6 +122,7 @@ end
 
 desc 'Generate changelog from log entries'
 private_lane :generate_changelog_from_logentries do |values|
+  ensure_towncrier_installed
   version = values[:version]
   files_to_remove = get_logentry_files_for_bash
 
@@ -149,4 +152,16 @@ private_lane :open_changelog_draft do
   Dir.chdir('..') do
     sh 'open towncrier/changelog_draft'
   end
+end
+
+desc 'Ensure towncrier is installed before use'
+private_lane :ensure_towncrier_installed do
+  next if sh('command -v towncrier >/dev/null 2>&1; echo $?').strip == '0'
+
+  if sh('command -v pipx >/dev/null 2>&1; echo $?').strip != '0'
+    UI.user_error!('pipx is required to install towncrier but was not found on this machine.')
+  end
+
+  UI.important('Towncrier is not installed. Installing it now...')
+  sh 'pipx install towncrier'
 end
