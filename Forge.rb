@@ -25,7 +25,7 @@ lane :install_developer_tools do
   # Install ruby-build, an rbenv plugin to easily install any version of ruby
   brew(command: 'install ruby-build') unless is_ci
 
-  # Install pipx for installing towncrier
+  # Install pipx
   brew(command: 'install pipx') unless is_ci
 
   # Install swiftlint
