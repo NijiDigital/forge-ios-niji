@@ -85,6 +85,25 @@ end
 # Test                    #
 ###########################
 
+desc 'Merge request analysis'
+lane :merge_request do |options|
+  prepare(options)
+
+  if ENV['PODFILE_PATH'].nil?
+    scan_with_project
+  else
+    scan_with_workspace
+  end
+
+  sonar_scanner
+
+  dependency_track
+
+  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
+
+  after_test(options)
+end
+
 desc 'Runs all the tests'
 lane :test do |options|
   prepare(options)
@@ -312,20 +331,26 @@ end
 # Metrics / Sonar         #
 ###########################
 
-desc "Install all metrics tools"
-private_lane :install_metrics_tools do
-  brew(command: 'install sonar-scanner')
-end
-
 desc "Send all metrics to Sonar"
 lane :send_metrics do |options|
   test(options)
+  sonar_scanner
+end
+
+desc "Scan the project with Sonar"
+lane :sonar_scanner do
   install_metrics_tools
   version = get_version_number(
     xcodeproj: ENV.fetch('XCPROJECT', nil),
     target: ENV.fetch('TARGET', nil)
   )
-  sonar(project_version: version)
+  sonar(project_version: version) 
+end
+
+desc "Install all metrics tools"
+private_lane :install_metrics_tools do
+  sh("pipx install mobsfscan --python python3.13")
+  brew(command: 'install sonar-scanner')
 end
 
 ###########################
@@ -416,8 +441,23 @@ end
 
 desc 'Send SBOM to Dependency Track'
 lane :dependency_track do
+  unless dependency_track_configured?
+    UI.message('Skipping dependency_track: missing Dependency Track environment variables')
+    next
+  end
+
   Dir.chdir("..") do
     brew(command: 'install cdxgen')
     sh("cdxgen --server-url #{ENV['DEPENDENCY_TRACK_URL']} --project-id #{ENV['DEPENDENCY_TRACK_PROJECT_ID']} --api-key #{ENV['DEPENDENCY_TRACK_API_KEY']}")
   end
+end
+
+private_lane :dependency_track_configured? do
+  required_variables = %w[
+    DEPENDENCY_TRACK_URL
+    DEPENDENCY_TRACK_PROJECT_ID
+    DEPENDENCY_TRACK_API_KEY
+  ]
+
+  required_variables.all? { |variable| !ENV[variable].to_s.strip.empty? }
 end
