@@ -169,11 +169,7 @@ lane :archive do |options|
 
   badge_icon
 
-  if options[:icloud] == true
-    export_options = {
-      iCloudContainerEnvironment: ENV['ICLOUD_CONTAINER_ENVIRONMENT']
-    }
-  end
+  export_options = ENV.fetch('EXPORT_PLIST_PATH', nil)
 
   if ENV['PODFILE_PATH'].nil?
     gym_with_project(
