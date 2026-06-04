@@ -163,5 +163,6 @@ private_lane :ensure_towncrier_installed do
   end
 
   UI.important('Towncrier is not installed. Installing it now...')
+  sh 'brew install pipx'
   sh 'pipx install towncrier'
 end
