@@ -17,16 +17,16 @@ end
 # Requirement             #
 ###########################
 
-desc 'Install developer tools'
-lane :install_developer_tools do
+desc 'Install for local development'
+lane :install_local_developer_tools do
   # Install rbenv for initializing ruby in the project
-  brew(command: 'install rbenv') unless is_ci
+  brew(command: 'install rbenv')
 
   # Install ruby-build, an rbenv plugin to easily install any version of ruby
-  brew(command: 'install ruby-build') unless is_ci
+  brew(command: 'install ruby-build')
 
   # Install pipx
-  brew(command: 'install pipx') unless is_ci
+  brew(command: 'install pipx')
 
   # Install swiftlint
   brew(command: 'install swiftlint')
@@ -59,7 +59,7 @@ end
 
 desc 'Generate project and install pods'
 lane :prepare do |options|
-  install_developer_tools
+  install_local_developer_tools unless is_ci
 
   before_prepare(options)
 
@@ -169,18 +169,14 @@ lane :archive do |options|
 
   badge_icon
 
-  export_options = ENV.fetch('EXPORT_PLIST_PATH', nil)
-
   if ENV['PODFILE_PATH'].nil?
     gym_with_project(
       export_method: export_method,
-      export_options: export_options,
       symbols_inclusion: symbols_inclusion
     )
   else
     gym_with_workspace(
       export_method: export_method,
-      export_options: export_options,
       symbols_inclusion: symbols_inclusion
     )
   end
@@ -199,7 +195,7 @@ private_lane :gym_with_project do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_options],
+    export_options: ENV.fetch('EXPORT_PLIST_PATH', nil),
     include_symbols: options[:symbols_inclusion]
   )
 end
@@ -217,7 +213,7 @@ private_lane :gym_with_workspace do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_options],
+    export_options: ENV.fetch('EXPORT_PLIST_PATH', nil),
     include_symbols: options[:symbols_inclusion]
   )
 end

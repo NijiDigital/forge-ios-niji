@@ -65,11 +65,10 @@ ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = 'GoogleService-Info.plist'.freeze # The path
 ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '' # https://firebase.google.com/docs/app-distribution/ios/distribute-fastlane?hl=fr#service-acc-fastlane
 ENV['FIREBASE_TEST_GROUP'] = '' # ID for group tester
 
-# Export (gym)
-ENV['EXPORT_PLIST_PATH'] = 'Configurations/ExportOptions/ReleaseDevPacificaCA-AdHoc.plist'
-
+# Export plist path (gym)
 # iCloud (optional, add iCloudContainerEnvironment key in the export plist)
-# ENV['ICLOUD_CONTAINER_ENVIRONMENT'] = 'Production' # 'Development'
+ENV['EXPORT_PLIST_PATH'] = ''
+
 
 # App Store Connect
 ENV['KEY_ID'] = ''.freeze
