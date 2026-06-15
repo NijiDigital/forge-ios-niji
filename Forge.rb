@@ -5,7 +5,6 @@
 before_all do
   UI.user_error! 'You must run fastlane using `bundle exec fastlane`' if ENV['BUNDLE_GEMFILE'].nil?
   fastlane_require 'fastlane-plugin-badge'
-  fastlane_require 'fastlane-plugin-brew'
   fastlane_require 'fastlane-plugin-changelog'
   fastlane_require 'fastlane-plugin-dependency_check_ios_analyzer'
   fastlane_require 'fastlane-plugin-firebase_app_distribution'
@@ -17,25 +16,30 @@ end
 # Requirement             #
 ###########################
 
+private_lane :brew_install do |options|
+  package = options[:package]
+  sh("brew install #{package}")
+end
+
 desc 'Install for local development'
 lane :install_local_developer_tools do
   # Install rbenv for initializing ruby in the project
-  brew(command: 'install rbenv')
+  brew_install(package: 'rbenv')
 
   # Install ruby-build, an rbenv plugin to easily install any version of ruby
-  brew(command: 'install ruby-build')
+  brew_install(package: 'ruby-build')
 
   # Install pipx
-  brew(command: 'install pipx')
+  brew_install(package: 'pipx')
 
   # Install swiftlint
-  brew(command: 'install swiftlint')
+  brew_install(package: 'swiftlint')
 
   # Install swiftformat
-  brew(command: 'install swiftformat')
+  brew_install(package: 'swiftformat')
 
   # Install periphery
-  brew(command: 'install peripheryapp/periphery/periphery')
+  brew_install(package: 'peripheryapp/periphery/periphery')
 end
 
 desc 'Prepare configuration'
@@ -251,7 +255,7 @@ desc 'Add a badge to the bottom of the icon with the version/build/env info'
 # @option add_badge: true|false — defaults to false (which just git-resets the icon to remove the badge)
 private_lane :badge_icon do |options|
   if options[:badge]
-    brew(command: 'install imagemagick')
+    brew_install(package: 'imagemagick')
     # Reset the icon
     Dir['../**/*.appiconset'].each do |path|
       puts %(Reverting: git checkout -- "#{path}")
@@ -341,9 +345,9 @@ end
 
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
-  brew(command: 'install pipx')
+  brew_install(package: 'pipx')
   sh("pipx install mobsfscan --python python3.13")
-  brew(command: 'install sonar-scanner')
+  brew_install(package: 'sonar-scanner')
 end
 
 ###########################
@@ -362,7 +366,7 @@ end
 desc 'Generate assets with SwiftGen'
 lane :swiftgen do
   Dir.chdir("..") do
-    brew(command: 'install swiftgen')
+    brew_install(package: 'swiftgen')
     sh("swiftgen config run --config #{ENV['SWIFTGEN_PATH']}")
   end
 end
@@ -440,7 +444,7 @@ lane :dependency_track do
   end
 
   Dir.chdir("..") do
-    brew(command: 'install cdxgen')
+    brew_install(package: 'cdxgen')
     sh("cdxgen --server-url #{ENV['DEPENDENCY_TRACK_URL']} --project-id #{ENV['DEPENDENCY_TRACK_PROJECT_ID']} --api-key #{ENV['DEPENDENCY_TRACK_API_KEY']}")
   end
 end
