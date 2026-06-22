@@ -17,16 +17,16 @@ end
 # Requirement             #
 ###########################
 
-desc 'Install developer tools'
-lane :install_developer_tools do
+desc 'Install for local development'
+lane :install_local_developer_tools do
   # Install rbenv for initializing ruby in the project
-  brew(command: 'install rbenv') unless is_ci
+  brew(command: 'install rbenv')
 
   # Install ruby-build, an rbenv plugin to easily install any version of ruby
-  brew(command: 'install ruby-build') unless is_ci
+  brew(command: 'install ruby-build')
 
-  # Install pyenv for python initialization in the project
-  brew(command: 'install pyenv') unless is_ci
+  # Install pipx
+  brew(command: 'install pipx')
 
   # Install swiftlint
   brew(command: 'install swiftlint')
@@ -59,7 +59,7 @@ end
 
 desc 'Generate project and install pods'
 lane :prepare do |options|
-  install_developer_tools
+  install_local_developer_tools unless is_ci
 
   before_prepare(options)
 
@@ -84,6 +84,25 @@ end
 ###########################
 # Test                    #
 ###########################
+
+desc 'Merge request analysis'
+lane :merge_request do |options|
+  prepare(options)
+
+  if ENV['PODFILE_PATH'].nil?
+    scan_with_project
+  else
+    scan_with_workspace
+  end
+
+  sonar_scanner
+
+  dependency_track
+
+  danger(dangerfile: ENV['DANGERFILE_PATH']) if is_ci && !ENV['DANGERFILE_PATH'].nil?
+
+  after_test(options)
+end
 
 desc 'Runs all the tests'
 lane :test do |options|
@@ -150,22 +169,14 @@ lane :archive do |options|
 
   badge_icon
 
-  if options[:icloud] == true
-    export_options = {
-      iCloudContainerEnvironment: ENV['ICLOUD_CONTAINER_ENVIRONMENT']
-    }
-  end
-
   if ENV['PODFILE_PATH'].nil?
     gym_with_project(
       export_method: export_method,
-      export_options: export_options,
       symbols_inclusion: symbols_inclusion
     )
   else
     gym_with_workspace(
       export_method: export_method,
-      export_options: export_options,
       symbols_inclusion: symbols_inclusion
     )
   end
@@ -184,7 +195,7 @@ private_lane :gym_with_project do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_options],
+    export_options: ENV.fetch('EXPORT_PLIST_PATH', nil),
     include_symbols: options[:symbols_inclusion]
   )
 end
@@ -202,7 +213,7 @@ private_lane :gym_with_workspace do |options|
     clean: false,
     build_path: ENV.fetch('BUILD_PATH', nil),
     output_directory: ENV.fetch('BUILD_PATH', nil),
-    export_options: options[:export_options],
+    export_options: ENV.fetch('EXPORT_PLIST_PATH', nil),
     include_symbols: options[:symbols_inclusion]
   )
 end
@@ -312,20 +323,27 @@ end
 # Metrics / Sonar         #
 ###########################
 
-desc "Install all metrics tools"
-private_lane :install_metrics_tools do
-  brew(command: 'install sonar-scanner')
-end
-
 desc "Send all metrics to Sonar"
 lane :send_metrics do |options|
   test(options)
+  sonar_scanner
+end
+
+desc "Scan the project with Sonar"
+lane :sonar_scanner do
   install_metrics_tools
   version = get_version_number(
     xcodeproj: ENV.fetch('XCPROJECT', nil),
     target: ENV.fetch('TARGET', nil)
   )
-  sonar(project_version: version)
+  sonar(project_version: version) 
+end
+
+desc "Install all metrics tools"
+private_lane :install_metrics_tools do
+  brew(command: 'install pipx')
+  sh("pipx install mobsfscan --python python3.13")
+  brew(command: 'install sonar-scanner')
 end
 
 ###########################
@@ -416,8 +434,23 @@ end
 
 desc 'Send SBOM to Dependency Track'
 lane :dependency_track do
+  unless dependency_track_configured?
+    UI.message('Skipping dependency_track: missing Dependency Track environment variables')
+    next
+  end
+
   Dir.chdir("..") do
     brew(command: 'install cdxgen')
     sh("cdxgen --server-url #{ENV['DEPENDENCY_TRACK_URL']} --project-id #{ENV['DEPENDENCY_TRACK_PROJECT_ID']} --api-key #{ENV['DEPENDENCY_TRACK_API_KEY']}")
   end
+end
+
+private_lane :dependency_track_configured? do
+  required_variables = %w[
+    DEPENDENCY_TRACK_URL
+    DEPENDENCY_TRACK_PROJECT_ID
+    DEPENDENCY_TRACK_API_KEY
+  ]
+
+  required_variables.all? { |variable| !ENV[variable].to_s.strip.empty? }
 end
