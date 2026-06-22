@@ -13,13 +13,8 @@ before_all do
 end
 
 ###########################
-# Requirement             #
+# Developer Tools        #
 ###########################
-
-private_lane :brew_install do |options|
-  package = options[:package]
-  sh("brew install #{package}")
-end
 
 desc 'Install for local development'
 lane :install_local_developer_tools do
@@ -42,14 +37,9 @@ lane :install_local_developer_tools do
   brew_install(package: 'peripheryapp/periphery/periphery')
 end
 
-desc 'Prepare configuration'
-lane :config do |options|
-  # override method
-end
-
-desc 'Switch to the specified environment'
-lane :switch_to_env do |options|
-  # override method
+private_lane :brew_install do |options|
+  package = options[:package]
+  sh("NONINTERACTIVE=1 HOMEBREW_NO_AUTO_UPDATE=1 brew install #{package}")
 end
 
 ###########################
@@ -82,6 +72,16 @@ end
 
 desc 'After prepare'
 lane :after_prepare do |options|
+  # override method
+end
+
+desc 'Prepare configuration'
+lane :config do |options|
+  # override method
+end
+
+desc 'Switch to the specified environment'
+lane :switch_to_env do |options|
   # override method
 end
 
