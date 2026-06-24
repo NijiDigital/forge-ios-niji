@@ -218,15 +218,27 @@ private_lane :gym_with_workspace do |options|
   )
 end
 
-desc 'Extract the build number from bitrise into environment variables and set in AppVersion.xcconfig'
+def resolve_ci_build_number
+  ci_build_number = ENV['CI_BUILD_NUMBER']
+  return ci_build_number unless ci_build_number.nil? || ci_build_number.empty?
+  legacy_build_number = ENV['BITRISE_BUILD_NUMBER']
+  unless legacy_build_number.nil? || legacy_build_number.empty?
+    UI.important('[DEPRECATION] BITRISE_BUILD_NUMBER is deprecated and will be removed in a future Forge release. Set CI_BUILD_NUMBER instead.')
+    return legacy_build_number
+  end
+  nil
+end
+
+desc 'Extract the build number from the CI environment and set it in AppVersion.xcconfig'
 private_lane :set_build_number do
   UI.message 'Extracting Build number'
-  if ENV['BITRISE_BUILD_NUMBER']
-    UI.message "==> bitrise build number : #{ENV['BITRISE_BUILD_NUMBER']}"
+  build_number = resolve_ci_build_number
+  if build_number
+    UI.message "==> CI build number : #{build_number}"
     update_xcconfig_value(
       path: ENV.fetch('APP_VERSION_PATH', nil),
       name: 'APP_BUILD_NUMBER',
-      value: ENV['BITRISE_BUILD_NUMBER']
+      value: build_number
     )
   end
 end
@@ -243,7 +255,7 @@ private_lane :get_versions_from_project do
     name: 'APP_BUILD_NUMBER'
   )
   ENV['VERSION_NUMBER'] = current_version
-  ENV['BUILD_NUMBER'] = ENV['BITRISE_BUILD_NUMBER'] || current_build_number
+  ENV['BUILD_NUMBER'] = resolve_ci_build_number || current_build_number
   UI.message "==> v#{ENV['VERSION_NUMBER']} (#{ENV['BUILD_NUMBER']})"
 end
 
