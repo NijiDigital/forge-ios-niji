@@ -127,17 +127,24 @@ CHANGELOG_PATH=CHANGELOG.md
 DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH=
 ```
 
-## Options Fastlane
+## Fastlane options
 
-- `badge:` true if adding a badge to the application icon (true or false or never)
-- `env:` define the environment use (dev, prod, stagging...)
-- `config:` define the xcconfig file use (Debug, InHouse, Release...)
-- `enterprise:` true if use an provisioning profiles from Apple Developer Enterprise (true or false or never)
+Options are passed as lane parameters (e.g. `badge:true`). They can be combined on lanes that call `prepare` and/or `archive`.
 
-for example :
+| Option | Type | Lanes | Description |
+| --- | --- | --- | --- |
+| `env` | `String` | `prepare`, `test`, `merge_request`, `archive`, `ota`, `beta`, `send_metrics` | Switch to the specified environment (e.g. `dev`, `uat`, `prod`). Calls the overridable `switch_to_env` lane. |
+| `config` | `String` | `prepare`, `test`, `merge_request`, `archive`, `ota`, `beta`, `send_metrics` | Apply the specified Xcode configuration (e.g. `Debug`, `InHouse`, `Release`). Calls the overridable `config` lane. |
+| `badge` | `Boolean` | `archive`, `ota`, `beta` | Add a version/build/environment badge on the app icon. Default: `false`. |
+| `enterprise` | `Boolean` | `archive`, `ota`, `beta` | Use Apple Developer Enterprise provisioning profiles (`true` = `enterprise`, `false` = `ad-hoc`). Default: `false`. |
+| `appstore` | `Boolean` | `archive` | Export for App Store distribution (`true` = `app-store`). Automatically set to `true` by the `beta` lane. Default: `false`. |
+
+Examples:
 
 ```sh
 bundle exec fastlane archive env:dev config:InHouse enterprise:true badge:true
+bundle exec fastlane beta env:uat config:Release badge:true
+bundle exec fastlane test env:dev config:Debug
 ```
 
 ## Override method Fastlane
