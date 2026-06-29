@@ -349,7 +349,10 @@ lane :sonar_scanner do
     xcodeproj: ENV.fetch('XCPROJECT', nil),
     target: ENV.fetch('TARGET', nil)
   )
-  sonar(project_version: version) 
+  sonar(
+    project_version: version
+    sonar_login: ENV['SONAR_TOKEN']
+  )
 end
 
 desc "Install all metrics tools"
