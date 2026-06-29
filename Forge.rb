@@ -350,8 +350,9 @@ lane :sonar_scanner do
     target: ENV.fetch('TARGET', nil)
   )
   sonar(
+    sonar_url: ENV['SONAR_URL'],
+    sonar_login: ENV['SONAR_TOKEN'],
     project_version: version
-    sonar_login: ENV['SONAR_TOKEN']
   )
 end
 
