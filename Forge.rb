@@ -10,6 +10,8 @@ before_all do
   fastlane_require 'fastlane-plugin-firebase_app_distribution'
   fastlane_require 'fastlane-plugin-xcconfig'
   fastlane_require 'fastlane-plugin-xcodegen'
+
+  update_fastlane unless is_ci
 end
 
 ###########################
@@ -51,6 +53,8 @@ lane :before_prepare do |options|
   # override method
 end
 
+# @option env [String] Switch to the specified environment (calls `switch_to_env`)
+# @option config [String] Apply the specified Xcode configuration (calls `config`)
 desc 'Generate project and install pods'
 lane :prepare do |options|
   install_local_developer_tools unless is_ci
@@ -161,6 +165,11 @@ end
 # Archive                 #
 ###########################
 
+# @option env [String] Switch to the specified environment (via `prepare`)
+# @option config [String] Apply the specified Xcode configuration (via `prepare`)
+# @option badge [Boolean] Add a version/build/environment badge on the app icon (default: false)
+# @option enterprise [Boolean] Use enterprise provisioning profiles (default: false, ad-hoc export)
+# @option appstore [Boolean] Export for App Store distribution (default: false)
 desc 'Build and archive the app'
 lane :archive do |options|
   distribution_method = options[:enterprise] == true ? 'enterprise' : 'ad-hoc'
@@ -171,7 +180,7 @@ lane :archive do |options|
 
   prepare(options)
 
-  badge_icon
+  badge_icon(options)
 
   if ENV['PODFILE_PATH'].nil?
     gym_with_project(
@@ -252,7 +261,7 @@ private_lane :get_versions_from_project do
 end
 
 desc 'Add a badge to the bottom of the icon with the version/build/env info'
-# @option add_badge: true|false — defaults to false (which just git-resets the icon to remove the badge)
+# @option badge [Boolean] Add a version/build/environment badge on the app icon (default: false)
 private_lane :badge_icon do |options|
   if options[:badge]
     brew_install(package: 'imagemagick')
@@ -340,13 +349,21 @@ lane :sonar_scanner do
     xcodeproj: ENV.fetch('XCPROJECT', nil),
     target: ENV.fetch('TARGET', nil)
   )
-  sonar(project_version: version) 
+  sonar(
+    sonar_url: ENV['SONAR_URL'],
+    sonar_login: ENV['SONAR_TOKEN'],
+    project_version: version
+  )
 end
 
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
-  brew_install(package: 'pipx')
-  sh("pipx install mobsfscan --python python3.13")
+  brew_install(package: 'pipx') unless is_ci
+  if is_ci
+    sh("pip3 install --upgrade mobsfscan")
+  else
+    sh("pipx install mobsfscan --python python3.13")
+  end
   brew_install(package: 'sonar-scanner')
 end
 
