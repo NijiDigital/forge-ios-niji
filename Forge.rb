@@ -365,8 +365,7 @@ end
 
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
-  brew_install(package: 'pipx')
-  sh("pipx install mobsfscan --python python3.13")
+  sh("pip install mobsfscan")
   brew_install(package: 'sonar-scanner')
 end
 
