@@ -235,6 +235,30 @@ private_lane :set_build_number do
   end
 end
 
+desc 'Read APP_VERSION from AppVersion.xcconfig, fallback to xcodeproj if missing'
+private_lane :get_app_version do
+  version = nil
+
+  begin
+    version = get_xcconfig_value(
+      path: ENV.fetch('APP_VERSION_PATH', nil),
+      name: 'APP_VERSION'
+    )
+  rescue FastlaneCore::Interface::FastlaneError => e
+    UI.important("Could not read APP_VERSION from xcconfig: #{e.message}")
+  end
+
+  if version.to_s.strip.empty?
+    UI.important('Falling back to get_version_number from xcodeproj')
+    get_version_number(
+      xcodeproj: ENV.fetch('XCPROJECT', nil),
+      target: ENV.fetch('TARGET', nil)
+    )
+  else
+    version
+  end
+end
+
 desc 'Extract the version & build number from the project into environment variables'
 private_lane :get_versions_from_project do
   UI.message 'Extracting Version & Build number…'
@@ -336,17 +360,12 @@ end
 desc "Scan the project with Sonar"
 lane :sonar_scanner do
   install_metrics_tools
-  version = get_version_number(
-    xcodeproj: ENV.fetch('XCPROJECT', nil),
-    target: ENV.fetch('TARGET', nil)
-  )
-  sonar(project_version: version) 
+  sonar(project_version: get_app_version)
 end
 
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
-  brew_install(package: 'pipx')
-  sh("pipx install mobsfscan --python python3.13")
+  sh("pip install mobsfscan")
   brew_install(package: 'sonar-scanner')
 end
 
