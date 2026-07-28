@@ -24,9 +24,6 @@ lane :install_local_developer_tools do
   # Install ruby-build, an rbenv plugin to easily install any version of ruby
   brew_install(package: 'ruby-build')
 
-  # Install pipx
-  brew_install(package: 'pipx')
-
   # Install swiftlint
   brew_install(package: 'swiftlint')
 
@@ -345,8 +342,7 @@ end
 
 desc "Install all metrics tools"
 private_lane :install_metrics_tools do
-  brew_install(package: 'pipx')
-  sh("pipx install mobsfscan --python python3.13")
+  sh("pip install mobsfscan --python python3.13")
   brew_install(package: 'sonar-scanner')
 end
 
