@@ -11,7 +11,7 @@ before_all do
   fastlane_require 'fastlane-plugin-xcconfig'
   fastlane_require 'fastlane-plugin-xcodegen'
 
-  update_fastlane
+  update_fastlane unless is_ci
 end
 
 ###########################
