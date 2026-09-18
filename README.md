@@ -4,19 +4,57 @@ Set of best practices to have when developing in an iOS project
 
 ## Installation
 
+Forge relies on [fastlane](https://docs.fastlane.tools/) to automate iOS builds, tests, and deployments. Installation starts with the three steps below, then continues with project configuration (Fastfile import, Forgefile dependencies, SwiftLint).
+
+### 1. Add fastlane to the Gemfile
+
+At the root of your Xcode project, create a `Gemfile` (if it does not already exist) to pin the Ruby tool versions used by the team and CI.
+
+```ruby
+source 'https://rubygems.org'
+
+gem 'fastlane'
+```
+
+Then install the dependencies:
+
+```sh
+bundle install
+```
+
+This generates a `Gemfile.lock` that should be committed to the repository. Always use `bundle exec fastlane` instead of `fastlane` alone to ensure the correct version is executed.
+
+### 2. Initialize fastlane
+
+Run initialization from the project root:
+
 ```sh
 bundle exec fastlane init
 ```
 
+This command creates the `fastlane/` folder with a `Fastfile` (lane definitions), an `Appfile` (app identifiers), and a `.env.default` (local environment variables). Answer the interactive prompts or keep the defaults; the `Fastfile` can be customized afterwards.
+
+### 3. Add Forge as a Git submodule
+
+Forge is distributed as a [Git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) so it can be versioned independently from the host project and updated in a controlled way.
+
+From the project root, move into the fastlane folder and add the submodule:
+
 ```sh
 cd fastlane
+git submodule add https://github.com/NijiDigital/forge-ios-niji.git forge
+cd ..
 ```
+
+The `fastlane/forge/` folder contains shared lanes, Danger plugins, base SwiftLint configuration, and more. A `.gitmodules` file is created at the repository root; commit it along with the other changes.
+
+To clone a project that already uses Forge:
 
 ```sh
 git submodule add https://github.com/NijiDigital/forge-ios-niji.git forge
 ```
 
-:warning: WARNING : For add submodule use the url HTTPS for the CI/CD connection
+:warning: **WARNING**: use the **HTTPS** URL (`https://github.com/...`) rather than SSH when adding the submodule, so CI/CD pipelines can fetch Forge without an SSH key.
 
 Add import in your `Fastfile` :
 
@@ -41,53 +79,52 @@ parent_config: fastlane/forge/.swiftlint_base.yml
 
 ## Environment Variables
 
-List of environment variables to use in your `Fastfile`
+Forge reads its configuration from environment variables. Add them to `fastlane/.env.default` at the root of the fastlane folder. Fastlane loads this file automatically on every run; commit it to the repository so the whole team shares the same defaults. For secrets (API keys, credentials), prefer CI/CD environment variables or a local `fastlane/.env` file (typically gitignored).
 
-```ruby
+```sh
 # Obligatory
 
-ENV['APP_VERSION_PATH'] = ''.freeze
-ENV['DERIVED_DATA_PATH'] = './DerivedData'.freeze
-ENV['BUILD_PATH'] = './Build'.freeze
-ENV['REPORTS_PATH'] = './Reports'.freeze
-ENV['PLIST_PATH'] = ''.freeze
+APP_VERSION_PATH=
+DERIVED_DATA_PATH=./DerivedData
+BUILD_PATH=./Build
+REPORTS_PATH=./Reports
+PLIST_PATH=
 
-ENV['XCWORKSPACE'] = 'NAME.xcworkspace'.freeze
-ENV['XCPROJECT'] = 'NAME.xcodeproj'.freeze
-ENV['SCHEME'] = ''
-ENV['APP_NAME'] = ''
-ENV['APP_ENVIRONMENT'] = '' # Define the environment
-ENV['TARGET'] = '' # For launch the lane send_metrics
-ENV['TARGET_TEST'] = ''
+XCWORKSPACE=NAME.xcworkspace
+XCPROJECT=NAME.xcodeproj
+SCHEME=
+APP_NAME=
+APP_ENVIRONMENT= # Define the environment
+TARGET= # For launching the send_metrics lane
+TARGET_TEST=
 
 # Firebase
-ENV['GS_INFO_PLIST_ARCHIVE_PATH'] = 'GoogleService-Info.plist'.freeze # The path to your GoogleService-Info.plist file, relative to the path to the archived product (xcarchive)
-ENV['GOOGLE_APPLICATION_CREDENTIALS'] = '' # https://firebase.google.com/docs/app-distribution/ios/distribute-fastlane?hl=fr#service-acc-fastlane
-ENV['FIREBASE_TEST_GROUP'] = '' # ID for group tester
+GS_INFO_PLIST_ARCHIVE_PATH=GoogleService-Info.plist # Path to GoogleService-Info.plist, relative to the archived product (xcarchive)
+GOOGLE_APPLICATION_CREDENTIALS= # https://firebase.google.com/docs/app-distribution/ios/distribute-fastlane#service-acc-fastlane
+FIREBASE_TEST_GROUP= # Tester group ID
 
 # Export plist path (gym)
 # iCloud (optional, add iCloudContainerEnvironment key in the export plist)
-ENV['EXPORT_PLIST_PATH'] = ''
-
+EXPORT_PLIST_PATH=
 
 # App Store Connect
-ENV['KEY_ID'] = ''.freeze
-ENV['ISSUER_ID'] = ''.freeze
-ENV['KEY_FILEPATH'] = ''.freeze
+KEY_ID=
+ISSUER_ID=
+KEY_FILEPATH=
 
 # Danger
-ENV['DANGERFILE_PATH'] = 'fastlane/forge/Dangerfile'.freeze
-ENV['JIRA_REF'] = '/(\b((JIRA)-)|#)[0-9]+\b/i'.freeze
-ENV['XCOV_MIN_PERCENTAGE'] = '80.00'.freeze
-ENV['XCOV_IGNORE_FILE_PATH'] = '.xcovignore'.freeze
-ENV['PERIPHERY_BINARY_PATH'] = '/usr/local/bin/periphery'.freeze
+DANGERFILE_PATH=fastlane/forge/Dangerfile
+JIRA_REF=/(\b((JIRA)-)|#)[0-9]+\b/i
+XCOV_MIN_PERCENTAGE=80.00
+XCOV_IGNORE_FILE_PATH=.xcovignore
+PERIPHERY_BINARY_PATH=/usr/local/bin/periphery
 
 # Optional
-ENV['PODFILE_PATH'] = 'Podfile'.freeze
-ENV['XCODEGEN_PATH'] = 'project.yml'.freeze
-ENV['POESIE_PATH'] = ''.freeze
-ENV['CHANGELOG_PATH'] = 'CHANGELOG.md'.freeze
-ENV['DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH'] = ''.freeze
+PODFILE_PATH=Podfile
+XCODEGEN_PATH=project.yml
+POESIE_PATH=
+CHANGELOG_PATH=CHANGELOG.md
+DEPENDENCY_CHECK_SUPPRESSION_FILE_PATH=
 ```
 
 ## Options Fastlane
