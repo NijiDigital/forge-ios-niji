@@ -256,32 +256,6 @@ end
 junit.parse "#{ENV['REPORTS_PATH']}/report.junit"
 junit.report
 
-##################
-# Run periphery  #
-##################
-
-unless ENV['PERIPHERY_BINARY_PATH'].nil?
-  periphery.binary_path = ENV['PERIPHERY_BINARY_PATH']
-
-  if ENV['PODFILE_PATH'].nil?
-    periphery.scan(
-      project: ENV['XCPROJECT'],
-      schemes: ENV['SCHEME'],
-      targets: ENV['SCHEME'],
-      skip_build: true,
-      index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
-    )
-  else
-    periphery.scan(
-      workspace: ENV['XCWORKSPACE'],
-      schemes: ENV['SCHEME'],
-      targets: ENV['SCHEME'],
-      skip_build: true,
-      index_store_path: "#{ENV['DERIVED_DATA_PATH']}/Index.noindex/DataStore" # './DerivedData/Index/DataStore' in Xcode 13 or earlier.
-    )
-  end
-end
-
 ####################
 # Dependency check #
 ####################
