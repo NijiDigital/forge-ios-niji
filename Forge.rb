@@ -34,9 +34,6 @@ lane :install_local_developer_tools do
 
   # Install swiftformat
   brew_install(package: 'swiftformat')
-
-  # Install periphery
-  brew_install(package: 'peripheryapp/periphery/periphery')
 end
 
 private_lane :brew_install do |options|

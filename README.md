@@ -117,7 +117,6 @@ DANGERFILE_PATH=fastlane/forge/Dangerfile
 JIRA_REF=/(\b((JIRA)-)|#)[0-9]+\b/i
 XCOV_MIN_PERCENTAGE=80.00
 XCOV_IGNORE_FILE_PATH=.xcovignore
-PERIPHERY_BINARY_PATH=/usr/local/bin/periphery
 
 # Optional
 PODFILE_PATH=Podfile
