@@ -38,7 +38,7 @@ end
 
 private_lane :brew_install do |options|
   package = options[:package]
-  sh("NONINTERACTIVE=1 brew install #{package}")
+  sh("HOMEBREW_NO_ASK=1 NONINTERACTIVE=1 brew install #{package}")
 end
 
 ###########################
