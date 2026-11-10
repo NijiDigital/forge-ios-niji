@@ -318,7 +318,17 @@ lane :ota do |options|
 
   before_ota_upload(options)
 
-  changelog = File.read(ENV['CHANGELOG_PATH'])
+  changelog_tmp = 'fastlane/changelog_tmp'
+  changelog_path = ENV['CHANGELOG_PATH']
+  changelog = if File.exist?(changelog_tmp)
+    File.read(changelog_tmp)
+  elsif changelog_path && File.exist?(changelog_path)
+    UI.important("No changelog at #{changelog_tmp}, falling back to #{changelog_path}")
+    File.read(changelog_path)
+  else
+    UI.important('No changelog file found, using empty release notes')
+    ''
+  end
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
