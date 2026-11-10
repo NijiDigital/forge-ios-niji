@@ -318,17 +318,7 @@ lane :ota do |options|
 
   before_ota_upload(options)
 
-  changelog_path = ENV['CHANGELOG_PATH']
-  version = get_app_version.to_s.strip
-  changelog = if !changelog_path.to_s.strip.empty? && File.exist?(changelog_path) && !version.empty?
-    read_changelog(
-      changelog_path: changelog_path,
-      section_identifier: "[#{version}]"
-    )
-  else
-    UI.important('No changelog file found, using empty release notes')
-    ''
-  end
+  changelog = current_release_notes
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
