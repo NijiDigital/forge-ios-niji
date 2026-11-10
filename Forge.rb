@@ -318,7 +318,7 @@ lane :ota do |options|
 
   before_ota_upload(options)
 
-  changelog = File.read(ENV['CHANGELOG_PATH'])
+  changelog = current_release_notes
 
   firebase_app_distribution(
     googleservice_info_plist_path: ENV.fetch('GS_INFO_PLIST_ARCHIVE_PATH', nil),
