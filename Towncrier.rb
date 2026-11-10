@@ -53,22 +53,6 @@ lane :create_logentry do |options|
   end
 end
 
-desc 'Write the current version release notes to changelog_tmp for the current build. Does not modify CHANGELOG.md or delete newsfragments.'
-lane :generate_build_changelog do
-  version = get_xcconfig_value(
-    path: ENV['APP_VERSION_PATH'],
-    name: 'APP_VERSION'
-  )
-
-  if version.nil? || version.strip.empty?
-    UI.user_error!("Missing app version in #{ENV['APP_VERSION_PATH']}")
-  end
-
-  Dir.chdir('..') do
-    sh "towncrier build --draft --version=#{version} > fastlane/changelog_tmp"
-  end
-end
-
 desc 'Generate a changelog using all the log entries'
 lane :generate_changelog do |options|
   version = get_xcconfig_value(

@@ -318,13 +318,13 @@ lane :ota do |options|
 
   before_ota_upload(options)
 
-  changelog_tmp = 'fastlane/changelog_tmp'
   changelog_path = ENV['CHANGELOG_PATH']
-  changelog = if File.exist?(changelog_tmp)
-    File.read(changelog_tmp)
-  elsif changelog_path && File.exist?(changelog_path)
-    UI.important("No changelog at #{changelog_tmp}, falling back to #{changelog_path}")
-    File.read(changelog_path)
+  version = get_app_version.to_s.strip
+  changelog = if !changelog_path.to_s.strip.empty? && File.exist?(changelog_path) && !version.empty?
+    read_changelog(
+      changelog_path: changelog_path,
+      section_identifier: "[#{version}]"
+    )
   else
     UI.important('No changelog file found, using empty release notes')
     ''
