@@ -111,6 +111,33 @@ lane :generate_changelog do |options|
   end
 end
 
+desc 'Release notes of the current version, without modifying CHANGELOG.md'
+private_lane :current_release_notes do
+  version = get_app_version.to_s.strip
+  UI.user_error!('Could not determine app version') if version.empty?
+
+  changelog_path = ENV['CHANGELOG_PATH'].to_s.strip
+  UI.user_error!('CHANGELOG_PATH is not set') if changelog_path.empty?
+
+  notes = ''
+  if Dir.chdir('..') { File.exist?(changelog_path) }
+    notes = read_changelog(changelog_path: changelog_path, section_identifier: "[#{version}]")
+  end
+  next notes unless notes.to_s.strip.empty?
+
+  has_fragments = Dir.chdir('..') do
+    Dir.glob(CHANGELOG_CATEGORIES.map { |c| "towncrier/*.#{c}" }).any?
+  end
+  if has_fragments
+    ensure_towncrier_installed
+    # 2>/dev/null : fastlane fusionne stderr, où towncrier écrit ses logs
+    next Dir.chdir('..') { sh("towncrier build --draft --version=#{version} 2>/dev/null", log: false) }
+  end
+
+  UI.important("No release notes for #{version} (no CHANGELOG section, no newsfragments)")
+  ''
+end
+
 desc 'Create a draft for an upcoming changelog'
 private_lane :create_draft_for_changelog do |values|
   ensure_towncrier_installed
