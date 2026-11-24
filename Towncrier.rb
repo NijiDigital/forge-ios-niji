@@ -126,7 +126,7 @@ private_lane :current_release_notes do
   next notes unless notes.to_s.strip.empty?
 
   has_fragments = Dir.chdir('..') do
-    Dir.glob(CHANGELOG_CATEGORIES.map { |c| "towncrier/*.#{c}" }).any?
+    Dir.glob(CHANGELOG_CATEGORIES.map { |c| "towncrier/*.#{c}.md" }).any?
   end
   if has_fragments
     ensure_towncrier_installed
